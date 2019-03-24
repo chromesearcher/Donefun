@@ -7,7 +7,7 @@ import android.view.View
 import android.view.ViewGroup
 import kotlinx.android.synthetic.main.task_item.view.*
 
-public class TaskAdapter (val context: Context, val tasks: ArrayList<TaskData>) : RecyclerView.Adapter<TaskAdapter.TaskViewHolder>() {
+public class TaskAdapter (val context: Context, val tasks: ArrayList<Task>) : RecyclerView.Adapter<TaskAdapter.TaskViewHolder>() {
 
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TaskViewHolder {
@@ -22,14 +22,16 @@ public class TaskAdapter (val context: Context, val tasks: ArrayList<TaskData>) 
     }
 
     override fun onBindViewHolder(holder: TaskViewHolder, position: Int) {
-        holder.taskNameTextView.text = tasks[position].text
-        holder.taskImageView.setImageResource(tasks[position].iconId)
+        holder.taskNameTextView.text = tasks[position].type.text
+        holder.taskImageView.setImageResource(tasks[position].type.iconId)
+        holder.statusTextView.text = tasks[position].status
     }
 
     class TaskViewHolder (itemView: View) : RecyclerView.ViewHolder (itemView){
 
         val taskNameTextView = itemView.task_name_textview
         val taskImageView = itemView.task_imageView
+        val statusTextView = itemView.status_textview
     }
 
 }

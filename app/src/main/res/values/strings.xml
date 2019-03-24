@@ -1,4 +1,5 @@
 <resources>
     <string name="app_name">Donefun</string>
     <string name="task_name">Task</string>
+    <string name="status">IN PROGRESS</string>
 </resources>
