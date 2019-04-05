@@ -15,6 +15,10 @@ class MainActivity : AppCompatActivity() {
     private val tasks: ArrayList<Task> = ArrayList()
     private val types: ArrayList<TaskType> = ArrayList()
 
+    private val defaultUser: String = "bro"
+
+    private val TAG: String = "myLogs"
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -23,7 +27,7 @@ class MainActivity : AppCompatActivity() {
         recyclerView.layoutManager = LinearLayoutManager(this)
 
         val db = FirebaseFirestore.getInstance()
-
+        val source = Source.DEFAULT
 
 
 //        val docRef = db.collection("taskTypes").document("8wyZTvgwtMtVnssHEHC4")
@@ -34,48 +38,68 @@ class MainActivity : AppCompatActivity() {
 //
 //        }
 
-        val source = Source.DEFAULT
-
-        val TAG = "myLogs"
-
-        val docRef = db.collection("users").document("bro")
-
-
-        docRef.get(source).addOnCompleteListener {task ->
-
-            if(task.isSuccessful) {
-                val document = task.result!!
-                Log.d(TAG, "Cached document data: ${document.data}")
-            } else {
-                Log.d(TAG, "Cached get failed: ", task.exception)
-            }
-
-        }
+//        val docRef = db.collection("boards").document("main")
+//
+//
+//        docRef.get(source).addOnCompleteListener {task ->
+//
+//            if(task.isSuccessful) {
+//                val document = task.result!!
+//                Log.d(TAG, "Cached document data: ${document.data}")
+//            } else {
+//                Log.d(TAG, "Cached get failed: ", task.exception)
+//            }
+//
+//        }
 
         db.collection("taskTypes").get()
             .addOnSuccessListener { docs ->
                 for (doc in docs) {
                     Log.d(TAG, "${doc.id} => ${doc.data}")
-                    val id = (doc.data["iconId"] as String).toInt()
+                    val iconId = (doc.data["iconId"] as String).toInt()
                     val name = doc.data["name"] as String
-                    Log.d(TAG,"${id!!::class.simpleName}")    // ... only class name
-                    Log.d(TAG, id.toString())
+                    Log.d(TAG,"${iconId!!::class.simpleName}")    // ... only class name
+                    Log.d(TAG, iconId.toString())
                     Log.d(TAG, name)
 
-                    var iconId: Int = 0
+                    val id = doc.id as String
 
-                    when (id) {
-                        0 -> iconId = R.drawable.ic_baseline_build_24px
-                        1 -> iconId = R.drawable.ic_shopping_cart_black_24dp
-                        2 -> iconId = R.drawable.ic_wc_black_24dp
+                    var icon: Int = 0
+
+                    when (iconId) {
+                        0 -> icon = R.drawable.ic_baseline_build_24px
+                        1 -> icon = R.drawable.ic_shopping_cart_black_24dp
+                        2 -> icon = R.drawable.ic_wc_black_24dp
                     }
 
-                    types.add(TaskType(iconId, name))
+                    types.add(TaskType(icon, name, id))
                     System.out.println("test it")
                 }
 
-                addTasks()
-                recyclerView.adapter = TaskAdapter(this, tasks)
+                db.collection("taskInstances")
+                    .whereEqualTo("board", "main")
+                    .get()
+                    .addOnSuccessListener { docs ->
+                        for (doc in docs) {
+                            Log.d(TAG, "${doc.id} => ${doc.data}")
+
+                            val status = doc.data["status"] as String
+                            val typeId = doc.data["typeId"] as String
+
+                            for (t in types) {
+                                Log.d(TAG, t.id)
+                                Log.d(TAG, typeId)
+                                if (t.id.equals(typeId)) {
+                                    tasks.add(Task(status, t))
+                                }
+                            }
+
+                            recyclerView.adapter = TaskAdapter(this, tasks)
+                        }
+                    }
+                    .addOnFailureListener { exc ->
+                        Log.w(TAG, "Error getting documents: ", exc)
+                    }
             }
             .addOnFailureListener {exc ->
                 Log.w(TAG, "ERROORRRR: ", exc)
@@ -92,27 +116,27 @@ class MainActivity : AppCompatActivity() {
 
     }
 
-    private fun addTypes() {
-
-        val build = R.drawable.ic_baseline_build_24px
-        val shopping = R.drawable.ic_shopping_cart_black_24dp
-        val wc = R.drawable.ic_wc_black_24dp
-
-        types.add(TaskType(R.drawable.ic_baseline_build_24px, "wash"))
-        types.add(TaskType(R.drawable.ic_shopping_cart_black_24dp, "homework"))
-        types.add(TaskType(R.drawable.ic_wc_black_24dp, "dickkicking"))
-
-
-
-        types.add(TaskType(build, "fix stuff"))
-        types.add(TaskType(wc, "dry the gloryhole"))
-        types.add(TaskType(wc, "three naryada wne ocheredy"))
-
-
-        types.add(TaskType(R.drawable.ic_baseline_build_24px, "ZAWOD"))
-        types.add(TaskType(shopping, "buy new brother"))
-        types.add(TaskType(R.drawable.ic_wc_black_24dp, "incest"))
-    }
+//    private fun addTypes() {
+//
+//        val build = R.drawable.ic_baseline_build_24px
+//        val shopping = R.drawable.ic_shopping_cart_black_24dp
+//        val wc = R.drawable.ic_wc_black_24dp
+//
+//        types.add(TaskType(R.drawable.ic_baseline_build_24px, "wash"))
+//        types.add(TaskType(R.drawable.ic_shopping_cart_black_24dp, "homework"))
+//        types.add(TaskType(R.drawable.ic_wc_black_24dp, "dickkicking"))
+//
+//
+//
+//        types.add(TaskType(build, "fix stuff"))
+//        types.add(TaskType(wc, "dry the gloryhole"))
+//        types.add(TaskType(wc, "three naryada wne ocheredy"))
+//
+//
+//        types.add(TaskType(R.drawable.ic_baseline_build_24px, "ZAWOD"))
+//        types.add(TaskType(shopping, "buy new brother"))
+//        types.add(TaskType(R.drawable.ic_wc_black_24dp, "incest"))
+//    }
 
     private fun addTasks() {
 
