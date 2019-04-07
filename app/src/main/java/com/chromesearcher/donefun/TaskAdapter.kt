@@ -22,8 +22,8 @@ public class TaskAdapter (val context: Context, val tasks: ArrayList<Task>) : Re
     }
 
     override fun onBindViewHolder(holder: TaskViewHolder, position: Int) {
-        holder.taskNameTextView.text = tasks[position].type.text
-        holder.taskImageView.setImageResource(tasks[position].type.iconId)
+        holder.taskNameTextView.text = tasks[position].template.text
+        holder.taskImageView.setImageResource(tasks[position].template.iconId)
         holder.statusTextView.text = tasks[position].status
     }
 

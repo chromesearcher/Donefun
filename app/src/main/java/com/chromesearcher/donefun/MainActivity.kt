@@ -13,7 +13,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var recyclerView: RecyclerView
 
     private val tasks: ArrayList<Task> = ArrayList()
-    private val types: ArrayList<TaskType> = ArrayList()
+    private val templates: ArrayList<TaskTemplate> = ArrayList()
 
     private val defaultUser: String = "bro"
 
@@ -32,9 +32,9 @@ class MainActivity : AppCompatActivity() {
 
 //        val docRef = db.collection("taskTypes").document("8wyZTvgwtMtVnssHEHC4")
 //        docRef.get().addOnSuccessListener { documentSnapshot ->
-//            val taskType = documentSnapshot.toObject(TaskType::class.java)
+//            val taskType = documentSnapshot.toObject(TaskTemplate::class.java)
 //
-//            tasks.add(Task("IN PROGRESS", taskType as TaskType))
+//            tasks.add(Task("IN PROGRESS", taskType as TaskTemplate))
 //
 //        }
 
@@ -72,7 +72,7 @@ class MainActivity : AppCompatActivity() {
                         2 -> icon = R.drawable.ic_wc_black_24dp
                     }
 
-                    types.add(TaskType(icon, name, id))
+                    templates.add(TaskTemplate(icon, name, id))
                     System.out.println("test it")
                 }
 
@@ -86,7 +86,7 @@ class MainActivity : AppCompatActivity() {
                             val status = doc.data["status"] as String
                             val typeId = doc.data["typeId"] as String
 
-                            for (t in types) {
+                            for (t in templates) {
                                 Log.d(TAG, t.id)
                                 Log.d(TAG, typeId)
                                 if (t.id.equals(typeId)) {
@@ -122,35 +122,35 @@ class MainActivity : AppCompatActivity() {
 //        val shopping = R.drawable.ic_shopping_cart_black_24dp
 //        val wc = R.drawable.ic_wc_black_24dp
 //
-//        types.add(TaskType(R.drawable.ic_baseline_build_24px, "wash"))
-//        types.add(TaskType(R.drawable.ic_shopping_cart_black_24dp, "homework"))
-//        types.add(TaskType(R.drawable.ic_wc_black_24dp, "dickkicking"))
+//        templates.add(TaskTemplate(R.drawable.ic_baseline_build_24px, "wash"))
+//        templates.add(TaskTemplate(R.drawable.ic_shopping_cart_black_24dp, "homework"))
+//        templates.add(TaskTemplate(R.drawable.ic_wc_black_24dp, "dickkicking"))
 //
 //
 //
-//        types.add(TaskType(build, "fix stuff"))
-//        types.add(TaskType(wc, "dry the gloryhole"))
-//        types.add(TaskType(wc, "three naryada wne ocheredy"))
+//        templates.add(TaskTemplate(build, "fix stuff"))
+//        templates.add(TaskTemplate(wc, "dry the gloryhole"))
+//        templates.add(TaskTemplate(wc, "three naryada wne ocheredy"))
 //
 //
-//        types.add(TaskType(R.drawable.ic_baseline_build_24px, "ZAWOD"))
-//        types.add(TaskType(shopping, "buy new brother"))
-//        types.add(TaskType(R.drawable.ic_wc_black_24dp, "incest"))
+//        templates.add(TaskTemplate(R.drawable.ic_baseline_build_24px, "ZAWOD"))
+//        templates.add(TaskTemplate(shopping, "buy new brother"))
+//        templates.add(TaskTemplate(R.drawable.ic_wc_black_24dp, "incest"))
 //    }
 
     private fun addTasks() {
 
 
-        tasks.add(Task("IN PROGRESS", types[0]))
-        tasks.add(Task("IN PROGRESS", types[1]))
-        tasks.add(Task("IN PROGRESS", types[2]))
-//        tasks.add(Task("IN PROGRESS", types[3]))
-//        tasks.add(Task("IN PROGRESS", types[4]))
-//        tasks.add(Task("IN PROGRESS", types[5]))
-//        tasks.add(Task("IN PROGRESS", types[6]))
-//        tasks.add(Task("IN PROGRESS", types[7]))
-//        tasks.add(Task("IN PROGRESS", types[8]))
-        tasks.add(Task("DONE", types[0]))
+        tasks.add(Task("IN PROGRESS", templates[0]))
+        tasks.add(Task("IN PROGRESS", templates[1]))
+        tasks.add(Task("IN PROGRESS", templates[2]))
+//        tasks.add(Task("IN PROGRESS", templates[3]))
+//        tasks.add(Task("IN PROGRESS", templates[4]))
+//        tasks.add(Task("IN PROGRESS", templates[5]))
+//        tasks.add(Task("IN PROGRESS", templates[6]))
+//        tasks.add(Task("IN PROGRESS", templates[7]))
+//        tasks.add(Task("IN PROGRESS", templates[8]))
+        tasks.add(Task("DONE", templates[0]))
 
     }
 }
