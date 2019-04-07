@@ -29,12 +29,48 @@ class LibActivity : AppCompatActivity() {
 
     private val TAG: String = "myLogs"
 
+
+    private val onItemClickListener: View.OnClickListener = View.OnClickListener{
+
+        val viewHolder: RecyclerView.ViewHolder = it.getTag() as RecyclerView.ViewHolder
+
+        var pos = viewHolder.adapterPosition
+
+        val item = templates.get(pos)
+        val oldId = item.id
+        val oldText = item.text
+        val oldIcon = item.iconId
+
+        Toast.makeText(applicationContext, "FUK U: " + item.text, Toast.LENGTH_SHORT).show()
+
+        val input = EditText(this)
+        input.inputType = InputType.TYPE_CLASS_TEXT
+        input.setText(oldText)
+
+        var builder = AlertDialog.Builder(this)
+        builder.setTitle("Edit template")
+        builder.setView(input)
+
+        builder.setPositiveButton("OK") { dialog, which ->
+            //                Toast.makeText(applicationContext, input.text.toString(), Toast.LENGTH_SHORT).show()
+
+            val newTemplate = TaskTemplate(oldIcon, input.text.toString(), oldId)
+            templates.set(pos, newTemplate)
+
+            // TODO: make it safe
+            recyclerView.adapter!!.notifyDataSetChanged() // danger, adapter may be null in come cases
+        }
+
+        builder.setNegativeButton("CANCEL") { dialog, which ->
+            Toast.makeText(applicationContext, "FUK U", Toast.LENGTH_SHORT).show()
+        }
+
+        builder.show()
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_lib)
-
-        recyclerView = findViewById(R.id.task_template_rv)
-        recyclerView.layoutManager = LinearLayoutManager(this)
 
         val db = FirebaseFirestore.getInstance()
         val source = Source.DEFAULT
@@ -59,7 +95,15 @@ class LibActivity : AppCompatActivity() {
 
                 }
 
-                recyclerView.adapter = TaskTemplateAdapter(this, templates)
+
+                recyclerView = findViewById(R.id.task_template_rv)
+                recyclerView.layoutManager = LinearLayoutManager(this)
+
+                val myAdapter = TaskTemplateAdapter(this, templates)
+
+                recyclerView.adapter = myAdapter
+
+                myAdapter.setOnItemClickListener(onItemClickListener)
             }
             .addOnFailureListener {exc ->
                 Log.w(TAG, "ERROR getting templates: ", exc)
@@ -75,7 +119,7 @@ class LibActivity : AppCompatActivity() {
 //            )
 
             var builder = AlertDialog.Builder(this)
-            builder.setTitle("Title")
+            builder.setTitle("Add template")
 
             val input = EditText(this)
             input.inputType = InputType.TYPE_CLASS_TEXT
