@@ -11,8 +11,13 @@ import android.view.View
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Source
 import android.content.Context.INPUT_METHOD_SERVICE
+import android.content.DialogInterface
 import android.support.v4.content.ContextCompat.getSystemService
+import android.support.v7.app.AlertDialog
+import android.text.InputType
 import android.view.inputmethod.InputMethodManager
+import android.widget.EditText
+import android.widget.Toast
 
 
 class LibActivity : AppCompatActivity() {
@@ -63,11 +68,34 @@ class LibActivity : AppCompatActivity() {
         fabAdd = findViewById(R.id.fabAdd)
 
         fabAdd.setOnClickListener {
-            val inputMethodManager = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+//            val inputMethodManager = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
 //            inputMethodManager.toggleSoftInputFromWindow(
 //                linearLayout.getApplicationWindowToken(),
 //                InputMethodManager.SHOW_FORCED, 0
 //            )
+
+            var builder = AlertDialog.Builder(this)
+            builder.setTitle("Title")
+
+            val input = EditText(this)
+            input.inputType = InputType.TYPE_CLASS_TEXT
+
+            builder.setView(input)
+
+            builder.setPositiveButton("OK") { dialog, which ->
+//                Toast.makeText(applicationContext, input.text.toString(), Toast.LENGTH_SHORT).show()
+
+                templates.add(TaskTemplate(0, input.text.toString(), "new"))
+
+                // TODO: make it safe
+                recyclerView.adapter!!.notifyDataSetChanged() // danger, adapter may be null in come cases
+            }
+
+            builder.setNegativeButton("CANCEL") { dialog, which ->
+                Toast.makeText(applicationContext, "FUK U", Toast.LENGTH_SHORT).show()
+            }
+
+            builder.show()
         }
     }
 
