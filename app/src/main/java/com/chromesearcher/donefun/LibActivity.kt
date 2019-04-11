@@ -12,24 +12,33 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Source
 import android.content.Context.INPUT_METHOD_SERVICE
 import android.content.DialogInterface
+import android.content.Intent
 import android.support.v4.content.ContextCompat.getSystemService
 import android.support.v7.app.AlertDialog
 import android.text.InputType
 import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
 import android.widget.Toast
+import androidx.recyclerview.selection.SelectionPredicates
+import androidx.recyclerview.selection.SelectionTracker
+import androidx.recyclerview.selection.StableIdKeyProvider
+import androidx.recyclerview.selection.StorageStrategy
 
 
-class LibActivity : AppCompatActivity() {
+class LibActivity: AppCompatActivity() {
 
     private lateinit var recyclerView: RecyclerView
     private lateinit var fabAdd: FloatingActionButton
+
+    private lateinit var tracker: SelectionTracker<Long>
 
     private val templates: ArrayList<TaskTemplate> = ArrayList()
 
     private val TAG: String = "myLogs"
 
+    private var addMode: Boolean = false
 
+/*
     private val onItemClickListener: View.OnClickListener = View.OnClickListener{
 
         val viewHolder: RecyclerView.ViewHolder = it.getTag() as RecyclerView.ViewHolder
@@ -42,7 +51,7 @@ class LibActivity : AppCompatActivity() {
         val oldIcon = item.iconId
 
         Toast.makeText(applicationContext, "FUK U: " + item.text, Toast.LENGTH_SHORT).show()
-
+        /*
         val input = EditText(this)
         input.inputType = InputType.TYPE_CLASS_TEXT
         input.setText(oldText)
@@ -66,16 +75,51 @@ class LibActivity : AppCompatActivity() {
         }
 
         builder.show()
+
+        */
     }
 
+    private val onItemLongClickListener: View.OnLongClickListener = View.OnLongClickListener {
+
+        val viewHolder: RecyclerView.ViewHolder = it.getTag() as RecyclerView.ViewHolder
+
+        var pos = viewHolder.adapterPosition
+
+        // TODO: add 'DO U RLY WANT TO DELETE?' dialog
+
+        templates.removeAt(pos)
+
+        // TODO: make it safe
+        recyclerView.adapter!!.notifyDataSetChanged() // danger, adapter may be null in come cases
+
+        true
+    }
+*/
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_lib)
 
+
+        // Selection code
+        if (savedInstanceState != null) {
+            tracker?.onRestoreInstanceState(savedInstanceState)
+        }
+
+//        val intent = getIntent()
+//        var mode: String = intent.getStringExtra("mode")
+//
+//        if (mode.equals("ADD")) {
+//            addMode = true
+//        }
+
+
+
+
+
         val db = FirebaseFirestore.getInstance()
         val source = Source.DEFAULT
 
-        db.collection("taskTypes").get()
+        db.collection("taskTypes").get(source)
             .addOnSuccessListener { docs ->
                 for (doc in docs) {
                     val iconId = (doc.data["iconId"] as String).toInt()
@@ -100,10 +144,21 @@ class LibActivity : AppCompatActivity() {
                 recyclerView.layoutManager = LinearLayoutManager(this)
 
                 val myAdapter = TaskTemplateAdapter(this, templates)
-
                 recyclerView.adapter = myAdapter
 
-                myAdapter.setOnItemClickListener(onItemClickListener)
+                tracker = SelectionTracker.Builder<Long>(
+                    "selection-1",
+                    recyclerView,
+                    StableIdKeyProvider(recyclerView),
+                    MyLookup(recyclerView),
+                    StorageStrategy.createLongStorage()
+                ).withSelectionPredicate(SelectionPredicates.createSelectAnything()
+                ).build()
+
+                myAdapter.setTracker(tracker)
+
+//                myAdapter.setOnItemClickListener(onItemClickListener)
+//                myAdapter.setOnItemLongClickListener(onItemLongClickListener)
             }
             .addOnFailureListener {exc ->
                 Log.w(TAG, "ERROR getting templates: ", exc)
@@ -140,6 +195,14 @@ class LibActivity : AppCompatActivity() {
             }
 
             builder.show()
+        }
+    }
+
+    override fun onSaveInstanceState(outState: Bundle?) {
+        super.onSaveInstanceState(outState)
+
+        if (outState != null) {
+            tracker?.onSaveInstanceState(outState)
         }
     }
 
