@@ -4,13 +4,13 @@ import android.content.Intent
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.support.design.widget.FloatingActionButton
-import android.support.v7.app.AlertDialog
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
-import android.text.InputType
+import android.support.v7.widget.Toolbar
 import android.util.Log
+import android.view.Menu
+import android.view.MenuItem
 import android.view.View
-import android.widget.EditText
 import android.widget.Toast
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Source
@@ -23,6 +23,9 @@ class BoardActivity : AppCompatActivity() {
 
     private lateinit var recyclerView: RecyclerView
     private lateinit var fabAddTask: FloatingActionButton
+    private lateinit var toolbar: Toolbar
+
+    private lateinit var board: String
 
     private val templates: ArrayList<TaskTemplate> = ArrayList()
     private val tasks: ArrayList<Task> = ArrayList()
@@ -34,7 +37,7 @@ class BoardActivity : AppCompatActivity() {
     private val source = Source.DEFAULT
 
     private val TAG: String = "myLogs"
-    private val BOARD: String = "main"
+    private val DEFAULT_BOARD: String = "main"
 
 
     private val onItemClickListener: View.OnClickListener = View.OnClickListener{
@@ -98,17 +101,29 @@ class BoardActivity : AppCompatActivity() {
         Fabric.with(this, Crashlytics())
         setContentView(R.layout.activity_board)
 
-        fabAddTask = findViewById(R.id.fabAddTask)
+//        val eboard: String = intent.getStringExtra("board")
+//
+//        if (eboard == null) {
+//            this.board = DEFAULT_BOARD
+//        } else {
+//            this.board = eboard
+//        }
 
+        board = DEFAULT_BOARD
+
+        toolbar = findViewById(R.id.toolbar_board)
+        setSupportActionBar(toolbar)
+
+        fabAddTask = findViewById(R.id.fabAddTask)
         fabAddTask.setOnClickListener {
             Toast.makeText(applicationContext, "FUK U", Toast.LENGTH_SHORT).show()
 
             // invoke LibActivity
 
-            var intent = Intent(this, LibActivity::class.java)
-            intent.putExtra("mode", "ADD")
-            intent.putExtra("board", BOARD)
-            startActivity(intent)
+            var newIntent = Intent(this, LibActivity::class.java)
+            newIntent.putExtra("mode", "ADD")
+            newIntent.putExtra("board", DEFAULT_BOARD)
+            startActivity(newIntent)
         }
 
         db.collection(templatesCollection)
@@ -131,7 +146,7 @@ class BoardActivity : AppCompatActivity() {
                     }
 
                     db.collection(tasksCollection)
-                            .whereEqualTo("board", BOARD)
+                            .whereEqualTo("board", DEFAULT_BOARD)
                             .get()
                             .addOnSuccessListener { docs ->
                                 for (doc in docs) {
@@ -164,5 +179,26 @@ class BoardActivity : AppCompatActivity() {
                 .addOnFailureListener {exc ->
                     Log.w(TAG, "Error getting taskTypes: ", exc)
                 }
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        menuInflater.inflate(R.menu.switch_menu, menu)
+        return true
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem?): Boolean {
+
+        if (item?.itemId == R.id.action_switch) {
+            val newIntent = Intent(this, LibActivity::class.java)
+            newIntent.putExtra("mode", "LIB")
+            newIntent.putExtra("board", board)
+            startActivity(newIntent)
+        }
+
+        return true
+    }
+
+    override fun onBackPressed() {
+        // nothing
     }
 }

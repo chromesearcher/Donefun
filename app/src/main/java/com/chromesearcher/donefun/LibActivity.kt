@@ -78,7 +78,7 @@ class LibActivity: AppCompatActivity() {
             builder.setTitle("Edit template")
             builder.setView(input)
 
-            builder.setPositiveButton("OK") { dialog, which ->
+            builder.setPositiveButton("OK") { _, _ ->
                 // Toast.makeText(applicationContext, input.text.toString(), Toast.LENGTH_SHORT).show()
 
                 // push data to DB (update template data)
@@ -96,25 +96,22 @@ class LibActivity: AppCompatActivity() {
                         .addOnFailureListener { e -> Log.w(TAG, "Error writing template", e) }
             }
 
-            builder.setNegativeButton("CANCEL") { dialog, which ->
+            builder.setNegativeButton("CANCEL") { _, _ ->
                 Toast.makeText(applicationContext, "FUK U", Toast.LENGTH_SHORT).show()
             }
 
             builder.show()
-
         }
     }
 
     private val onItemLongClickListener: View.OnLongClickListener = View.OnLongClickListener {
 
         val viewHolder: RecyclerView.ViewHolder = it.tag as RecyclerView.ViewHolder
-
         var pos = viewHolder.adapterPosition
 
-        // flow LIB
 
         if (addMode) { /* not implemented */ }
-        else {
+        else { // flow LIB
 
             // TODO: add 'DO U RLY WANT TO DELETE?' dialog
 
@@ -138,7 +135,6 @@ class LibActivity: AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_lib)
 
-        val intent = getIntent()
         var mode: String = intent.getStringExtra("mode")
 
         if (mode == "ADD") {
@@ -146,6 +142,7 @@ class LibActivity: AppCompatActivity() {
         }
 
         board = intent.getStringExtra("board")
+
 
         db.collection(tasksCollection)
                 .whereEqualTo("board", board)
@@ -250,8 +247,8 @@ class LibActivity: AppCompatActivity() {
 
                 // TODO: do we need to wait until all ADD TO DB threads are over?
 
-                var intent = Intent(this, BoardActivity::class.java)
-                startActivity(intent)
+                var newIntent = Intent(this, BoardActivity::class.java)
+                startActivity(newIntent)
 
 
 
@@ -271,11 +268,11 @@ class LibActivity: AppCompatActivity() {
 
                 builder.setView(input)
 
-                builder.setPositiveButton("OK") { dialog, which ->
+                builder.setPositiveButton("OK") { _, _ ->
                     // Toast.makeText(applicationContext, input.text.toString(), Toast.LENGTH_SHORT).show()
 
                     val data = HashMap<String, Any>()
-                    data["iconId"] = 0
+                    data["iconId"] = "0"
                     data["name"] = input.text.toString()
 
                     // push new data to DB
@@ -290,7 +287,7 @@ class LibActivity: AppCompatActivity() {
 
                 }
 
-                builder.setNegativeButton("CANCEL") { dialog, which ->
+                builder.setNegativeButton("CANCEL") { _, _ ->
                     Toast.makeText(applicationContext, "FUK U", Toast.LENGTH_SHORT).show()
                 }
 
@@ -299,4 +296,17 @@ class LibActivity: AppCompatActivity() {
         }
     }
 
+    override fun onBackPressed() {
+
+
+//        var activity: Class<*>? = null
+//
+//        when (board) {
+//            "main" -> activity = BoardActivity::class.java
+//        }
+
+        val newIntent = Intent(this, BoardActivity::class.java)
+//        newIntent.putExtra("board", board)
+        startActivity(newIntent)
+    }
 }
