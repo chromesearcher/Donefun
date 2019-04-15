@@ -47,7 +47,7 @@ class BoardActivity : AppCompatActivity() {
         val status = item.status
         val template = item.template
 
-        val newStatus = if (status.equals("IN PROGRESS")) "DONE" else "IN PROGRESS"
+        val newStatus = if (status == "IN PROGRESS") "DONE" else "IN PROGRESS"
 
 
         Toast.makeText(applicationContext, "FUK U: " + item.template.text, Toast.LENGTH_SHORT).show()
@@ -65,6 +65,31 @@ class BoardActivity : AppCompatActivity() {
                     recyclerView.adapter!!.notifyDataSetChanged() // danger, adapter may be null in come cases
                 }
                 .addOnFailureListener { e -> Log.w(TAG, "Error writing|updating task", e) }
+    }
+
+
+    // long tap allows to delete chosen task from current board (and from DB)
+    private val onItemLongClickListener: View.OnLongClickListener = View.OnLongClickListener {
+
+        val viewHolder: RecyclerView.ViewHolder = it.tag as RecyclerView.ViewHolder
+        var pos = viewHolder.adapterPosition
+
+        // TODO: add 'DO U RLY WANT TO DELETE?' dialog
+
+        // delete the task from DB
+        db.collection(tasksCollection).document(tasks[pos].id)
+                .delete()
+                .addOnSuccessListener {
+                    tasks.removeAt(pos)
+                    Log.d(TAG, "task successfully deleted from DB!")
+
+                    // TODO: make it safe
+                    recyclerView.adapter!!.notifyDataSetChanged() // danger, adapter may be null in come cases
+                }
+                .addOnFailureListener { e -> Log.w(TAG, "Error deleting task", e) }
+
+
+        true
     }
 
 
@@ -129,6 +154,7 @@ class BoardActivity : AppCompatActivity() {
                                     recyclerView.adapter = myAdapter
 
                                     myAdapter.setOnItemClickListener(onItemClickListener)
+                                    myAdapter.setOnItemLongClickListener(onItemLongClickListener)
                                 }
                             }
                             .addOnFailureListener { exc ->

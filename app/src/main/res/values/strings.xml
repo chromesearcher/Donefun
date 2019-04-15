@@ -2,4 +2,6 @@
     <string name="app_name">Donefun</string>
     <string name="task_name">Task</string>
     <string name="status">IN PROGRESS</string>
+    <string name="lib_title">Lib</string>
+    <string name="board_title">Main board</string>
 </resources>

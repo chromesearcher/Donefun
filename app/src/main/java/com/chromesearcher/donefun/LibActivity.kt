@@ -59,7 +59,7 @@ class LibActivity: AppCompatActivity() {
 
             if (item.selected) nSelected-- else nSelected++
 
-            // TODO: add action bar (now implemented via FAB)
+            // TODO: add action bar | toolbar (now implemented via FAB)
 
             // TODO: make it safe
             recyclerView.adapter!!.notifyDataSetChanged() // danger, adapter may be null in come cases
@@ -101,7 +101,6 @@ class LibActivity: AppCompatActivity() {
             }
 
             builder.show()
-
 
         }
     }
@@ -153,7 +152,7 @@ class LibActivity: AppCompatActivity() {
                 .get()
                 .addOnSuccessListener { docs ->
 
-                    // only DONE or _NOT_ISTANCIATED_
+                    // only IN PROGRESS
                     var taskTypeIds: ArrayList<String> = ArrayList()
 
                     for (doc in docs) {
@@ -161,7 +160,8 @@ class LibActivity: AppCompatActivity() {
                         val status = doc.data["status"] as String // TODO: null check
 
                         // we should NOT be able to add new tasks which are IN PROGRESS already
-                        if (status != "IN PROGRESS") {
+                        // therefore we remember which are already in progress and filter them later
+                        if (status == "IN PROGRESS") {
                             taskTypeIds.add(typeId)
                         }
 
@@ -175,7 +175,7 @@ class LibActivity: AppCompatActivity() {
                                     val iconId = (doc.data["iconId"] as String).toInt()
                                     val text = doc.data["name"] as String
 
-                                    val id = doc.id as String
+                                    val id = doc.id
 
                                     var icon: Int = 0
 
@@ -188,7 +188,8 @@ class LibActivity: AppCompatActivity() {
                                     if (addMode) {
                                         // filter already instancieted Templates (those which are IN PROGRESS)
                                         // if there is task with cur type id, not add it
-                                        if (taskTypeIds.contains(id)) {
+                                        // show only DONE or NOT ISTANCIATED types
+                                        if (!taskTypeIds.contains(id)) {
                                             templates.add(SelectableTaskTemplate(icon, text, id, false))
                                         }
                                     } else {

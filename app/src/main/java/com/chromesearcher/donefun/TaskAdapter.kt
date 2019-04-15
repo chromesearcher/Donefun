@@ -7,11 +7,12 @@ import android.view.View
 import android.view.ViewGroup
 import kotlinx.android.synthetic.main.task_item.view.*
 
-class TaskAdapter (val context: Context, val tasks: ArrayList<Task>)
+class TaskAdapter (private val context: Context, private val tasks: ArrayList<Task>)
     : RecyclerView.Adapter<TaskAdapter.TaskViewHolder>() {
 
 
     private lateinit var onItemClickListener: View.OnClickListener
+    private lateinit var onItemLongClickListener: View.OnLongClickListener
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TaskViewHolder {
 
@@ -34,11 +35,16 @@ class TaskAdapter (val context: Context, val tasks: ArrayList<Task>)
         onItemClickListener = itemClickListener
     }
 
+    fun setOnItemLongClickListener(itemLongClickListener: View.OnLongClickListener) {
+        onItemLongClickListener = itemLongClickListener
+    }
+
     inner class TaskViewHolder (itemView: View) : RecyclerView.ViewHolder (itemView){
 
         init {
             itemView.tag = this
             itemView.setOnClickListener(onItemClickListener)
+            itemView.setOnLongClickListener(onItemLongClickListener)
         }
 
         val taskNameTextView = itemView.task_name_textview
