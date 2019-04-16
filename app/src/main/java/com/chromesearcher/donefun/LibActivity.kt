@@ -113,19 +113,31 @@ class LibActivity: AppCompatActivity() {
         if (addMode) { /* not implemented */ }
         else { // flow LIB
 
-            // TODO: add 'DO U RLY WANT TO DELETE?' dialog
+            //'DO U RLY WANT TO DELETE?' dialog
 
-            // delete the template from DB
-            db.collection(templatesCollection).document(templates[pos].id)
-                    .delete()
-                    .addOnSuccessListener {
-                        templates.removeAt(pos)
-                        Log.d(TAG, "template successfully deleted from DB!")
+            var builder = AlertDialog.Builder(this)
+            builder.setTitle("Do you want to delete template?")
 
-                        // TODO: make it safe
-                        recyclerView.adapter!!.notifyDataSetChanged() // danger, adapter may be null in come cases
-                    }
-                    .addOnFailureListener { e -> Log.w(TAG, "Error deleting template", e) }
+            builder.setPositiveButton("OK") { _, _ ->
+
+                // delete the template from DB
+                db.collection(templatesCollection).document(templates[pos].id)
+                        .delete()
+                        .addOnSuccessListener {
+                            templates.removeAt(pos)
+                            Log.d(TAG, "template successfully deleted from DB!")
+
+                            // TODO: make it safe
+                            recyclerView.adapter!!.notifyDataSetChanged() // danger, adapter may be null in come cases
+                        }
+                        .addOnFailureListener { e -> Log.w(TAG, "Error deleting template", e) }
+            }
+
+            builder.setNegativeButton("CANCEL") { _, _ ->
+                Toast.makeText(applicationContext, "FUK U", Toast.LENGTH_SHORT).show()
+            }
+
+            builder.show()
         }
 
         true
@@ -220,38 +232,48 @@ class LibActivity: AppCompatActivity() {
 
             if (addMode) {
 
-                for (template in templates) {
-                    if ((template as SelectableTaskTemplate).selected) {
+                // DO YOU REALLY WANNA SUBMIT CHOICE' dialog
 
-                        // push new task to DB
+                var builder = AlertDialog.Builder(this)
+                builder.setTitle("Do you want to submit choice?")
 
-                        val data = HashMap<String, Any>()
-                        data["board"] = board
-                        data["status"] = "IN PROGRESS"
-                        data["typeId"] = template.id
+                builder.setPositiveButton("OK") { _, _ ->
 
-                        db.collection(tasksCollection)
-                                .add(data)
-                                .addOnSuccessListener { docRef ->
-                                    Log.d(TAG, "DocumentSnapshot written with ID: ${docRef.id}")
-                                }
-                                .addOnFailureListener { e ->
-                                    Log.w(TAG, "Error adding new Task", e)
-                                }
+                    for (template in templates) {
+                        if ((template as SelectableTaskTemplate).selected) {
+
+                            // push new task to DB
+
+                            val data = HashMap<String, Any>()
+                            data["board"] = board
+                            data["status"] = "IN PROGRESS"
+                            data["typeId"] = template.id
+
+                            db.collection(tasksCollection)
+                                    .add(data)
+                                    .addOnSuccessListener { docRef ->
+                                        Log.d(TAG, "DocumentSnapshot written with ID: ${docRef.id}")
+                                    }
+                                    .addOnFailureListener { e ->
+                                        Log.w(TAG, "Error adding new Task", e)
+                                    }
+                        }
                     }
+
+                    //                var newIntent = Intent(this, BoardActivity::class.java)
+                    //                startActivity(newIntent)
+
+                    // return to Board screen
+                    finish() // back to previous activity
                 }
 
-                // return to Board screen
+                builder.setNegativeButton("CANCEL") { _, _ ->
+                    Toast.makeText(applicationContext, "FUK U", Toast.LENGTH_SHORT).show()
+                }
 
-                // TODO: add 'DO YOU REALLY WANNA SUBMIT CHOICE' dialog
+                builder.show()
 
                 // TODO: do we need to wait until all ADD TO DB threads are over?
-
-//                var newIntent = Intent(this, BoardActivity::class.java)
-//                startActivity(newIntent)
-                finish() // back to previous activity
-
-
 
             } else { // LIB flow
 

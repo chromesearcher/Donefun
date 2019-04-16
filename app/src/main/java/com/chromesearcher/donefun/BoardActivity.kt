@@ -4,6 +4,7 @@ import android.content.Intent
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.support.design.widget.FloatingActionButton
+import android.support.v7.app.AlertDialog
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
 import android.support.v7.widget.Toolbar
@@ -77,20 +78,31 @@ class BoardActivity : AppCompatActivity() {
         val viewHolder: RecyclerView.ViewHolder = it.tag as RecyclerView.ViewHolder
         var pos = viewHolder.adapterPosition
 
-        // TODO: add 'DO U RLY WANT TO DELETE?' dialog
+        //'DO U RLY WANT TO DELETE?' dialog
 
-        // delete the task from DB
-        db.collection(tasksCollection).document(tasks[pos].id)
-                .delete()
-                .addOnSuccessListener {
-                    tasks.removeAt(pos)
-                    Log.d(TAG, "task successfully deleted from DB!")
+        var builder = AlertDialog.Builder(this)
+        builder.setTitle("Do you want to delete task?")
 
-                    // TODO: make it safe
-                    recyclerView.adapter!!.notifyDataSetChanged() // danger, adapter may be null in come cases
-                }
-                .addOnFailureListener { e -> Log.w(TAG, "Error deleting task", e) }
+        builder.setPositiveButton("OK") { _, _ ->
 
+            // delete the task from DB
+            db.collection(tasksCollection).document(tasks[pos].id)
+                    .delete()
+                    .addOnSuccessListener {
+                        tasks.removeAt(pos)
+                        Log.d(TAG, "task successfully deleted from DB!")
+
+                        // TODO: make it safe
+                        recyclerView.adapter!!.notifyDataSetChanged() // danger, adapter may be null in come cases
+                    }
+                    .addOnFailureListener { e -> Log.w(TAG, "Error deleting task", e) }
+        }
+
+        builder.setNegativeButton("CANCEL") { _, _ ->
+            Toast.makeText(applicationContext, "FUK U", Toast.LENGTH_SHORT).show()
+        }
+
+        builder.show()
 
         true
     }
@@ -164,12 +176,14 @@ class BoardActivity : AppCompatActivity() {
 
                                     recyclerView = findViewById(R.id.tasks_recycler_view)
                                     recyclerView.layoutManager = LinearLayoutManager(this)
+                                    recyclerView.addItemDecoration(MarginItemDecoration(resources.getDimension(R.dimen.default_padding).toInt()))
 
                                     val myAdapter = TaskAdapter(this, tasks)
                                     recyclerView.adapter = myAdapter
 
                                     myAdapter.setOnItemClickListener(onItemClickListener)
                                     myAdapter.setOnItemLongClickListener(onItemLongClickListener)
+
                                 }
                             }
                             .addOnFailureListener { exc ->
