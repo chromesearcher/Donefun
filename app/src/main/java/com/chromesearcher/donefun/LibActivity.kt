@@ -247,8 +247,9 @@ class LibActivity: AppCompatActivity() {
 
                 // TODO: do we need to wait until all ADD TO DB threads are over?
 
-                var newIntent = Intent(this, BoardActivity::class.java)
-                startActivity(newIntent)
+//                var newIntent = Intent(this, BoardActivity::class.java)
+//                startActivity(newIntent)
+                finish() // back to previous activity
 
 
 
@@ -305,8 +306,10 @@ class LibActivity: AppCompatActivity() {
 //            "main" -> activity = BoardActivity::class.java
 //        }
 
-        val newIntent = Intent(this, BoardActivity::class.java)
-//        newIntent.putExtra("board", board)
-        startActivity(newIntent)
+//        val newIntent = Intent(this, BoardActivity::class.java)
+////        newIntent.putExtra("board", board)
+//        startActivity(newIntent)
+
+        finish()
     }
 }
