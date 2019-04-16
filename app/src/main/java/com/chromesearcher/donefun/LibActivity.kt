@@ -155,73 +155,37 @@ class LibActivity: AppCompatActivity() {
 
         board = intent.getStringExtra("board")
 
-
-        db.collection(tasksCollection)
-                .whereEqualTo("board", board)
-                .get()
+        // Acquire Templates (all)
+        db.collection(templatesCollection).get(source)
                 .addOnSuccessListener { docs ->
-
-                    // only IN PROGRESS
-                    var taskTypeIds: ArrayList<String> = ArrayList()
-
                     for (doc in docs) {
-                        val typeId = doc.data["typeId"] as String // TODO: null check
-                        val status = doc.data["status"] as String // TODO: null check
+                        val iconId = (doc.data["iconId"] as String).toInt()
+                        val text = doc.data["name"] as String
 
-                        // we should NOT be able to add new tasks which are IN PROGRESS already
-                        // therefore we remember which are already in progress and filter them later
-                        if (status == "IN PROGRESS") {
-                            taskTypeIds.add(typeId)
+                        val id = doc.id
+
+                        var icon: Int = 0
+
+                        when (iconId) {
+                            0 -> icon = R.drawable.ic_baseline_build_24px
+                            1 -> icon = R.drawable.ic_shopping_cart_black_24dp
+                            2 -> icon = R.drawable.ic_wc_black_24dp
                         }
 
-                        System.out.println("fuk u")
+                        templates.add(SelectableTaskTemplate(icon, text, id, false))
                     }
 
-                    // Acquire Templates (only not yet Instanciated)
-                    db.collection(templatesCollection).get(source)
-                            .addOnSuccessListener { docs ->
-                                for (doc in docs) {
-                                    val iconId = (doc.data["iconId"] as String).toInt()
-                                    val text = doc.data["name"] as String
+                    recyclerView = findViewById(R.id.task_template_rv)
+                    recyclerView.layoutManager = LinearLayoutManager(this)
 
-                                    val id = doc.id
+                    val myAdapter = TaskTemplateAdapter(this, templates)
+                    recyclerView.adapter = myAdapter
 
-                                    var icon: Int = 0
-
-                                    when (iconId) {
-                                        0 -> icon = R.drawable.ic_baseline_build_24px
-                                        1 -> icon = R.drawable.ic_shopping_cart_black_24dp
-                                        2 -> icon = R.drawable.ic_wc_black_24dp
-                                    }
-
-                                    if (addMode) {
-                                        // filter already instancieted Templates (those which are IN PROGRESS)
-                                        // if there is task with cur type id, not add it
-                                        // show only DONE or NOT ISTANCIATED types
-                                        if (!taskTypeIds.contains(id)) {
-                                            templates.add(SelectableTaskTemplate(icon, text, id, false))
-                                        }
-                                    } else {
-                                        templates.add(SelectableTaskTemplate(icon, text, id, false))
-                                    }
-                                }
-
-
-                                recyclerView = findViewById(R.id.task_template_rv)
-                                recyclerView.layoutManager = LinearLayoutManager(this)
-
-                                val myAdapter = TaskTemplateAdapter(this, templates)
-                                recyclerView.adapter = myAdapter
-
-                                myAdapter.setOnItemClickListener(onItemClickListener)
-                                myAdapter.setOnItemLongClickListener(onItemLongClickListener)
-                            }
-                            .addOnFailureListener {exc ->
-                                Log.w(TAG, "ERROR getting templates: ", exc)
-                            }
+                    myAdapter.setOnItemClickListener(onItemClickListener)
+                    myAdapter.setOnItemLongClickListener(onItemLongClickListener)
                 }
-                .addOnFailureListener { exc ->
-                    Log.w(TAG, "Error getting taskInstances: ", exc)
+                .addOnFailureListener {exc ->
+                    Log.w(TAG, "ERROR getting templates: ", exc)
                 }
 
 
