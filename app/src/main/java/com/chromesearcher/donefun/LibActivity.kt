@@ -31,11 +31,9 @@ class LibActivity: AppCompatActivity() {
     private lateinit var board: String
     private var nSelected: Int = 0
 
-
     private val templates: ArrayList<TaskTemplate> = ArrayList()
 
     private val TAG: String = "myLogs"
-
     private var addMode: Boolean = false
 
     private val tasksCollection: String = "taskInstances"
@@ -53,19 +51,15 @@ class LibActivity: AppCompatActivity() {
         Toast.makeText(applicationContext, "FUK U: " + item.text, Toast.LENGTH_SHORT).show()
 
         if (addMode) { // flow add task
-
             // flip selection
             item.selected = !item.selected
-
             if (item.selected) nSelected-- else nSelected++
 
             // TODO: add action bar | toolbar (now implemented via FAB)
 
             // TODO: make it safe
             recyclerView.adapter!!.notifyDataSetChanged() // danger, adapter may be null in come cases
-
         } else { // flow LIB
-
             val oldId = item.id
             val oldText = item.text
             val oldIcon = item.iconId
@@ -77,10 +71,7 @@ class LibActivity: AppCompatActivity() {
             var builder = AlertDialog.Builder(this)
             builder.setTitle("Edit template")
             builder.setView(input)
-
             builder.setPositiveButton("OK") { _, _ ->
-                // Toast.makeText(applicationContext, input.text.toString(), Toast.LENGTH_SHORT).show()
-
                 // push data to DB (update template data)
                 db.collection(templatesCollection).document(oldId)
                         .update("name", input.text.toString())
@@ -95,31 +86,23 @@ class LibActivity: AppCompatActivity() {
                         }
                         .addOnFailureListener { e -> Log.w(TAG, "Error writing template", e) }
             }
-
             builder.setNegativeButton("CANCEL") { _, _ ->
                 Toast.makeText(applicationContext, "FUK U", Toast.LENGTH_SHORT).show()
             }
-
             builder.show()
         }
     }
 
     private val onItemLongClickListener: View.OnLongClickListener = View.OnLongClickListener {
-
         val viewHolder: RecyclerView.ViewHolder = it.tag as RecyclerView.ViewHolder
         var pos = viewHolder.adapterPosition
 
-
         if (addMode) { /* not implemented */ }
         else { // flow LIB
-
             //'DO U RLY WANT TO DELETE?' dialog
-
             var builder = AlertDialog.Builder(this)
             builder.setTitle("Do you want to delete template?")
-
             builder.setPositiveButton("OK") { _, _ ->
-
                 // delete the template from DB
                 db.collection(templatesCollection).document(templates[pos].id)
                         .delete()
@@ -132,14 +115,11 @@ class LibActivity: AppCompatActivity() {
                         }
                         .addOnFailureListener { e -> Log.w(TAG, "Error deleting template", e) }
             }
-
             builder.setNegativeButton("CANCEL") { _, _ ->
                 Toast.makeText(applicationContext, "FUK U", Toast.LENGTH_SHORT).show()
             }
-
             builder.show()
         }
-
         true
     }
 
@@ -161,9 +141,7 @@ class LibActivity: AppCompatActivity() {
                     for (doc in docs) {
                         val iconId = (doc.data["iconId"] as String).toInt()
                         val text = doc.data["name"] as String
-
                         val id = doc.id
-
                         var icon: Int = 0
 
                         when (iconId) {
@@ -171,7 +149,6 @@ class LibActivity: AppCompatActivity() {
                             1 -> icon = R.drawable.ic_shopping_cart_black_24dp
                             2 -> icon = R.drawable.ic_wc_black_24dp
                         }
-
                         templates.add(SelectableTaskTemplate(icon, text, id, false))
                     }
 
@@ -188,26 +165,18 @@ class LibActivity: AppCompatActivity() {
                     Log.w(TAG, "ERROR getting templates: ", exc)
                 }
 
-
-
         fabAdd = findViewById(R.id.fabAdd)
-
         fabAdd.setOnClickListener {
 
             if (addMode) {
 
                 // DO YOU REALLY WANNA SUBMIT CHOICE' dialog
-
                 var builder = AlertDialog.Builder(this)
                 builder.setTitle("Do you want to submit choice?")
-
                 builder.setPositiveButton("OK") { _, _ ->
-
                     for (template in templates) {
                         if ((template as SelectableTaskTemplate).selected) {
-
                             // push new task to DB
-
                             val data = HashMap<String, Any>()
                             data["board"] = board
                             data["status"] = "IN PROGRESS"
@@ -223,10 +192,6 @@ class LibActivity: AppCompatActivity() {
                                     }
                         }
                     }
-
-                    //                var newIntent = Intent(this, BoardActivity::class.java)
-                    //                startActivity(newIntent)
-
                     // return to Board screen
                     finish() // back to previous activity
                 }
@@ -234,30 +199,19 @@ class LibActivity: AppCompatActivity() {
                 builder.setNegativeButton("CANCEL") { _, _ ->
                     Toast.makeText(applicationContext, "FUK U", Toast.LENGTH_SHORT).show()
                 }
-
                 builder.show()
 
                 // TODO: do we need to wait until all ADD TO DB threads are over?
 
             } else { // LIB flow
 
-//                val inputMethodManager = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-//                inputMethodManager.toggleSoftInputFromWindow(
-//                    linearLayout.getApplicationWindowToken(),
-//                    InputMethodManager.SHOW_FORCED, 0
-//                )
-
                 var builder = AlertDialog.Builder(this)
                 builder.setTitle("Add template")
 
                 val input = EditText(this)
                 input.inputType = InputType.TYPE_CLASS_TEXT
-
                 builder.setView(input)
-
                 builder.setPositiveButton("OK") { _, _ ->
-                    // Toast.makeText(applicationContext, input.text.toString(), Toast.LENGTH_SHORT).show()
-
                     val data = HashMap<String, Any>()
                     data["iconId"] = "0"
                     data["name"] = input.text.toString()
@@ -271,20 +225,16 @@ class LibActivity: AppCompatActivity() {
                                 // TODO: make it safe
                                 recyclerView.adapter!!.notifyDataSetChanged() // danger, adapter may be null in come cases
                             }
-
                 }
-
                 builder.setNegativeButton("CANCEL") { _, _ ->
                     Toast.makeText(applicationContext, "FUK U", Toast.LENGTH_SHORT).show()
                 }
-
                 builder.show()
             }
         }
     }
 
     override fun onBackPressed() {
-
 
 //        var activity: Class<*>? = null
 //

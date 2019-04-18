@@ -4,6 +4,7 @@ import android.content.Intent
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.support.design.widget.FloatingActionButton
+import android.support.design.widget.NavigationView
 import android.support.v7.app.AlertDialog
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
@@ -17,10 +18,12 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Source
 import com.crashlytics.android.Crashlytics
 import io.fabric.sdk.android.Fabric
+import android.support.v4.view.GravityCompat
+import android.support.v4.widget.DrawerLayout
+import android.support.v7.app.ActionBarDrawerToggle
 
 
-
-class BoardActivity : AppCompatActivity() {
+class BoardActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener {
 
     private lateinit var recyclerView: RecyclerView
     private lateinit var fabAddTask: FloatingActionButton
@@ -126,6 +129,14 @@ class BoardActivity : AppCompatActivity() {
         toolbar = findViewById(R.id.toolbar_board)
         setSupportActionBar(toolbar)
 
+        val drawer = findViewById<DrawerLayout>(R.id.drawer_layout)
+        val toggle = ActionBarDrawerToggle(this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close)
+        drawer.addDrawerListener(toggle)
+        toggle.syncState()
+
+        val navigationView = findViewById<NavigationView>(R.id.nav_view)
+        navigationView.setNavigationItemSelectedListener(this)
+
         fabAddTask = findViewById(R.id.fabAddTask)
         fabAddTask.setOnClickListener {
             Toast.makeText(applicationContext, "FUK U", Toast.LENGTH_SHORT).show()
@@ -209,6 +220,34 @@ class BoardActivity : AppCompatActivity() {
             startActivity(newIntent)
         }
 
+        return true
+    }
+
+    override fun onNavigationItemSelected(item: MenuItem): Boolean {
+
+        // Handle navigation view item clicks here.
+        val id = item.itemId
+
+        when (id) {
+            R.id.nav_board1 -> {
+                // Handle the camera action
+            }
+            R.id.nav_board2 -> {
+
+            }
+            R.id.nav_board3 -> {
+
+            }
+            R.id.nav_board4 -> {
+
+            }
+            R.id.nav_add -> {
+
+            }
+        }
+
+        val drawer = findViewById<DrawerLayout>(R.id.drawer_layout)
+        drawer.closeDrawer(GravityCompat.START)
         return true
     }
 

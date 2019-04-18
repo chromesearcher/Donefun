@@ -5,4 +5,14 @@
     <string name="lib_title">Lib</string>
     <string name="board_title">Main board</string>
     <string name="switch_title">Switch</string>
+    <string name="header1">Android Studio</string>
+    <string name="header2">android.studio@android.com</string>
+    <string name="nav_board1">Board 1</string>
+    <string name="nav_board2">Board 2</string>
+    <string name="nav_board3">Board 3</string>
+    <string name="nav_board4">Board 4</string>
+    <string name="nav_add_board1">Add new board</string>
+    <string name="nav_add_board2">+ Board…</string>
+    <string name="navigation_drawer_open">OPEN</string>
+    <string name="navigation_drawer_close">CLOSE</string>
 </resources>

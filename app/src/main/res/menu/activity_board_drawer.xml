@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <group android:checkableBehavior="single">
+        <item
+            android:id="@+id/nav_board1"
+            android:title="@string/nav_board1" />
+        <item
+            android:id="@+id/nav_board2"
+            android:title="@string/nav_board2" />
+        <item
+            android:id="@+id/nav_board3"
+            android:title="@string/nav_board3" />
+        <item
+            android:id="@+id/nav_board4"
+            android:title="@string/nav_board4" />
+    </group>
+
+    <item android:title="@string/nav_add_board1">
+        <menu>
+            <item
+                android:id="@+id/nav_add"
+                android:icon="@drawable/ic_add_circle_black_24dp"
+                android:title="@string/nav_add_board2" />
+        </menu>
+    </item>
+
+</menu>

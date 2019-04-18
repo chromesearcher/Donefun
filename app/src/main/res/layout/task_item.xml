@@ -5,8 +5,6 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="#6200ee"
-        android:paddingBottom="5dp"
-        android:paddingTop="5dp"
 >
 
     <ImageView
@@ -40,8 +38,11 @@
             android:text="TextView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:id="@+id/status_textview" android:layout_marginEnd="8dp" app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent" app:layout_constraintBottom_toBottomOf="parent"
+            android:id="@+id/status_textview"
+        android:layout_marginEnd="8dp"
+        app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
             tools:text="@string/status"/>
 
 
