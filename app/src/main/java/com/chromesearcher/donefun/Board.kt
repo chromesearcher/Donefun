@@ -1,3 +1,3 @@
 package com.chromesearcher.donefun
 
-data class Board (val name: String, val owner: String, val id: String)
+data class Board (val name: String, val actor: String, val id: String)

@@ -2,8 +2,10 @@
     <string name="app_name">Donefun</string>
     <string name="task_name">Task</string>
     <string name="status">IN PROGRESS</string>
+    <string name="login_title">LOGIN</string>
     <string name="lib_title">Lib</string>
     <string name="board_title">Main board</string>
+    <string name="boardslist_title">All boards</string>
     <string name="switch_title">Switch</string>
     <string name="header1">Android Studio</string>
     <string name="header2">android.studio@android.com</string>
@@ -11,8 +13,9 @@
     <string name="nav_board2">Board 2</string>
     <string name="nav_board3">Board 3</string>
     <string name="nav_board4">Board 4</string>
-    <string name="nav_add_board1">Add new board</string>
-    <string name="nav_add_board2">+ Board…</string>
+    <string name="nav_add_board1">See other boards</string>
+    <string name="nav_add_board2">To all boards list</string>
     <string name="navigation_drawer_open">OPEN</string>
     <string name="navigation_drawer_close">CLOSE</string>
+    <string name="login_button">sign in</string>
 </resources>

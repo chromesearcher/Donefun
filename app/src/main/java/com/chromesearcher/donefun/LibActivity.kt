@@ -235,17 +235,6 @@ class LibActivity: AppCompatActivity() {
     }
 
     override fun onBackPressed() {
-
-//        var activity: Class<*>? = null
-//
-//        when (board) {
-//            "main" -> activity = BoardActivity::class.java
-//        }
-
-//        val newIntent = Intent(this, BoardActivity::class.java)
-////        newIntent.putExtra("board", board)
-//        startActivity(newIntent)
-
         finish()
     }
 }

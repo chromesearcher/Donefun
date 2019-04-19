@@ -1,5 +1,6 @@
 package com.chromesearcher.donefun
 
+import android.app.Activity
 import android.content.Intent
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
@@ -28,21 +29,22 @@ class BoardActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelect
     private lateinit var recyclerView: RecyclerView
     private lateinit var fabAddTask: FloatingActionButton
     private lateinit var toolbar: Toolbar
+    private lateinit var drawerMenu: Menu
 
     private lateinit var board: String
 
     private val templates: ArrayList<TaskTemplate> = ArrayList()
     private val tasks: ArrayList<Task> = ArrayList()
+    private val boards: ArrayList<Board> = ArrayList()
 
     private val tasksCollection: String = "taskInstances"
     private val templatesCollection: String = "taskTypes"
+    private val boardsCollection: String = "boards"
 
     private val db = FirebaseFirestore.getInstance()
-    private val source = Source.DEFAULT
+    private val source = Source.DEFAULT // TODO: use this in DB calls
 
     private val TAG: String = "myLogs"
-    private val DEFAULT_BOARD: String = "main"
-
 
     private val onItemClickListener: View.OnClickListener = View.OnClickListener{
 
@@ -56,18 +58,16 @@ class BoardActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelect
 
         val newStatus = if (status == "IN PROGRESS") "DONE" else "IN PROGRESS"
 
-
         Toast.makeText(applicationContext, "FUK U: " + item.template.text, Toast.LENGTH_SHORT).show()
 
-        // add DB interaction (update status)
+        // DB interaction (update status)
         db.collection(tasksCollection).document(id)
                 .update("status", newStatus)
                 .addOnSuccessListener {
                     val newTask = Task(newStatus, template, id)
-                    tasks.set(pos, newTask)
+                    tasks[pos] = newTask
 
                     Log.d(TAG, "DocumentSnapshot (task) successfully written|updated!")
-
                     // TODO: make it safe
                     recyclerView.adapter!!.notifyDataSetChanged() // danger, adapter may be null in come cases
                 }
@@ -113,23 +113,16 @@ class BoardActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelect
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        Fabric.with(this, Crashlytics())
+//        Fabric.with(this, Crashlytics())
         setContentView(R.layout.activity_board)
 
-//        val eboard: String = intent.getStringExtra("board")
-//
-//        if (eboard == null) {
-//            this.board = DEFAULT_BOARD
-//        } else {
-//            this.board = eboard
-//        }
-
-        board = DEFAULT_BOARD
+        board = intent.getStringExtra("board")
 
         toolbar = findViewById(R.id.toolbar_board)
         setSupportActionBar(toolbar)
 
         val drawer = findViewById<DrawerLayout>(R.id.drawer_layout)
+
         val toggle = ActionBarDrawerToggle(this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close)
         drawer.addDrawerListener(toggle)
         toggle.syncState()
@@ -137,15 +130,43 @@ class BoardActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelect
         val navigationView = findViewById<NavigationView>(R.id.nav_view)
         navigationView.setNavigationItemSelectedListener(this)
 
-        fabAddTask = findViewById(R.id.fabAddTask)
+        drawerMenu = navigationView.menu
+
+        db.collection(boardsCollection)
+                .get()
+                .addOnSuccessListener { docs ->
+                    for (doc in docs) {
+                        val actor = doc.data["actor"] as String
+                        val name = doc.data["name"] as String
+                        val id = doc.id
+
+                        if (id == board) {
+                            this.title = name
+                        }
+
+                        boards.add(Board(name, actor, id))
+                    }
+
+                    val item1 = drawerMenu.findItem(R.id.nav_board1)
+                    val item2 = drawerMenu.findItem(R.id.nav_board2)
+                    val item3 = drawerMenu.findItem(R.id.nav_board3)
+
+                    item1.title = boards[0].name
+                    item2.title = boards[1].name
+                    item3.title = boards[2].name
+                }
+                .addOnFailureListener { exc ->
+                    Log.w(TAG, "Error getting boards: ", exc)
+                }
+
+        fabAddTask = findViewById<FloatingActionButton>(R.id.fabAddTask)
         fabAddTask.setOnClickListener {
             Toast.makeText(applicationContext, "FUK U", Toast.LENGTH_SHORT).show()
 
             // invoke LibActivity
-
             var newIntent = Intent(this, LibActivity::class.java)
             newIntent.putExtra("mode", "ADD")
-            newIntent.putExtra("board", DEFAULT_BOARD)
+            newIntent.putExtra("board", board)
             startActivity(newIntent)
         }
 
@@ -156,8 +177,7 @@ class BoardActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelect
                         val iconId = (doc.data["iconId"] as String).toInt()
                         val name = doc.data["name"] as String
                         val id = doc.id
-
-                        var icon: Int = 0
+                        var icon = 0
 
                         when (iconId) {
                             0 -> icon = R.drawable.ic_baseline_build_24px
@@ -169,18 +189,16 @@ class BoardActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelect
                     }
 
                     db.collection(tasksCollection)
-                            .whereEqualTo("board", DEFAULT_BOARD)
+                            .whereEqualTo("board", board)
                             .get()
                             .addOnSuccessListener { docs ->
                                 for (doc in docs) {
-                                    Log.d(TAG, "${doc.id} => ${doc.data}")
-
                                     val status = doc.data["status"] as String
                                     val typeId = doc.data["typeId"] as String
                                     val id = doc.id
 
                                     for (t in templates) {
-                                        if (t.id.equals(typeId)) {
+                                        if (t.id == typeId) {
                                             tasks.add(Task(status, t, id))
                                         }
                                     }
@@ -208,8 +226,12 @@ class BoardActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelect
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         menuInflater.inflate(R.menu.switch_menu, menu)
+
+//        this.menu = menu as Menu
         return true
     }
+
+
 
     override fun onOptionsItemSelected(item: MenuItem?): Boolean {
 
@@ -219,7 +241,6 @@ class BoardActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelect
             newIntent.putExtra("board", board)
             startActivity(newIntent)
         }
-
         return true
     }
 
@@ -228,23 +249,30 @@ class BoardActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelect
         // Handle navigation view item clicks here.
         val id = item.itemId
 
+        var boardId = 0
+
         when (id) {
             R.id.nav_board1 -> {
-                // Handle the camera action
+                // go to board 1
+                boardId = 0
             }
             R.id.nav_board2 -> {
-
+                // go to board 2
+                boardId = 1
             }
             R.id.nav_board3 -> {
-
+                // go to board 3
+                boardId = 2
             }
-            R.id.nav_board4 -> {
 
-            }
-            R.id.nav_add -> {
-
+            R.id.nav_all_boards -> {
+                // go to boards screen
             }
         }
+
+        var newIntent = Intent(this, BoardActivity::class.java)
+        newIntent.putExtra("board", boards[boardId].id)
+        startActivity(newIntent)
 
         val drawer = findViewById<DrawerLayout>(R.id.drawer_layout)
         drawer.closeDrawer(GravityCompat.START)
@@ -252,6 +280,6 @@ class BoardActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelect
     }
 
     override fun onBackPressed() {
-        // nothing
+        // to prev board?
     }
 }
