@@ -69,7 +69,7 @@ class BoardsListActivity: AppCompatActivity() {
         builder.show()
     }
 
-    // long tap allows to delete chosen task from current board (and from DB)
+    // long tap allows to delete chosen board from the board list (and from DB)
     private val onItemLongClickListener: View.OnLongClickListener = View.OnLongClickListener {
 
         val viewHolder: RecyclerView.ViewHolder = it.tag as RecyclerView.ViewHolder
@@ -165,6 +165,8 @@ class BoardsListActivity: AppCompatActivity() {
     }
 
     override fun onBackPressed() {
+        var newIntent = Intent()
+        setResult(RESULT_OK, newIntent)
         finish()
     }
 }

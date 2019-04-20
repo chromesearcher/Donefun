@@ -193,6 +193,8 @@ class LibActivity: AppCompatActivity() {
                         }
                     }
                     // return to Board screen
+                    var newIntent = Intent()
+                    setResult(RESULT_OK, newIntent)
                     finish() // back to previous activity
                 }
 
@@ -235,6 +237,8 @@ class LibActivity: AppCompatActivity() {
     }
 
     override fun onBackPressed() {
+        var newIntent = Intent()
+        setResult(RESULT_OK, newIntent)
         finish()
     }
 }

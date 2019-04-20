@@ -11,6 +11,7 @@ import io.fabric.sdk.android.Fabric
 class LoginActivity : AppCompatActivity() {
 
     private val DEFAULT_BOARD_ID: String = "main"
+    private val DEFAULT_PREV_BOARD_ID: String = "login"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -24,6 +25,7 @@ class LoginActivity : AppCompatActivity() {
             // invoke BoardActivity
             var newIntent = Intent(this, BoardActivity::class.java)
             newIntent.putExtra("board", DEFAULT_BOARD_ID)
+            newIntent.putExtra("prevBoard", DEFAULT_PREV_BOARD_ID)
             startActivity(newIntent)
         }
     }

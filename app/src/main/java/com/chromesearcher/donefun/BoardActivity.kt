@@ -46,6 +46,10 @@ class BoardActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelect
     private val source = Source.DEFAULT // TODO: use this in DB calls
 
     private val TAG: String = "myLogs"
+    private val REQUEST_CODE_LIB_ADD = 0
+    private val REQUEST_CODE_LIB_FLOW = 1
+    private val REQUEST_CODE_BOARDS_LIST = 2
+    private val REQUEST_CODE_BOARD = 3
 
     private val onItemClickListener: View.OnClickListener = View.OnClickListener{
 
@@ -134,6 +138,28 @@ class BoardActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelect
 
         drawerMenu = navigationView.menu
 
+        downloadBoards()
+
+        fabAddTask = findViewById(R.id.fabAddTask)
+        fabAddTask.setOnClickListener {
+            Toast.makeText(applicationContext, "FUK U", Toast.LENGTH_SHORT).show()
+
+            // invoke LibActivity
+            var newIntent = Intent(this, LibActivity::class.java)
+            newIntent.putExtra("mode", "ADD")
+            newIntent.putExtra("board", board)
+            startActivityForResult(newIntent, REQUEST_CODE_LIB_ADD)
+        }
+
+        downloadTasksAndTemplates()
+    }
+
+    private fun refreshBoards() {
+        boards.clear()
+        downloadBoards()
+    }
+
+    private fun downloadBoards() {
         // Acquire BOARDS
         db.collection(boardsCollection)
                 .get()
@@ -157,24 +183,21 @@ class BoardActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelect
 
                     when(boards.size) {
                         0 -> {
-                            // TODO: item1.setVisible(false)
+                            // TODO: change to: item1.setVisible(false)
                             item1.title = "no board"
                             item2.title = "no board"
                             item3.title = "no board"
                         }
-
                         1 -> {
                             item1.title = boards[0].name
                             item2.title = "no board"
                             item3.title = "no board"
                         }
-
                         2 -> {
                             item1.title = boards[0].name
                             item2.title = boards[1].name
                             item3.title = "no board"
                         }
-
                         else -> {
                             item1.title = boards[0].name
                             item2.title = boards[1].name
@@ -185,18 +208,16 @@ class BoardActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelect
                 .addOnFailureListener { exc ->
                     Log.w(TAG, "Error getting boards: ", exc)
                 }
+    }
 
-        fabAddTask = findViewById<FloatingActionButton>(R.id.fabAddTask)
-        fabAddTask.setOnClickListener {
-            Toast.makeText(applicationContext, "FUK U", Toast.LENGTH_SHORT).show()
+    private fun refreshTaskAndTemplates() {
+        // may be optimized
+        tasks.clear()
+        templates.clear()
+        downloadTasksAndTemplates()
+    }
 
-            // invoke LibActivity
-            var newIntent = Intent(this, LibActivity::class.java)
-            newIntent.putExtra("mode", "ADD")
-            newIntent.putExtra("board", board)
-            startActivity(newIntent)
-        }
-
+    private fun downloadTasksAndTemplates() {
         db.collection(templatesCollection)
                 .get()
                 .addOnSuccessListener { docs ->
@@ -232,7 +253,7 @@ class BoardActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelect
 
                                     recyclerView = findViewById(R.id.tasks_recycler_view)
                                     recyclerView.layoutManager = LinearLayoutManager(this)
-                                    recyclerView.addItemDecoration(MarginItemDecoration(resources.getDimension(R.dimen.default_padding).toInt()))
+//                                    recyclerView.addItemDecoration(MarginItemDecoration(resources.getDimension(R.dimen.default_padding).toInt()))
 
                                     val myAdapter = TaskAdapter(this, tasks)
                                     recyclerView.adapter = myAdapter
@@ -264,7 +285,7 @@ class BoardActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelect
             val newIntent = Intent(this, LibActivity::class.java)
             newIntent.putExtra("mode", "LIB")
             newIntent.putExtra("board", board)
-            startActivity(newIntent)
+            startActivityForResult(newIntent, REQUEST_CODE_LIB_FLOW)
         }
         return true
     }
@@ -315,7 +336,7 @@ class BoardActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelect
 
                 var newIntent = Intent(this, BoardsListActivity::class.java)
                 newIntent.putExtra("user", user)
-                startActivity(newIntent)
+                startActivityForResult(newIntent, REQUEST_CODE_BOARDS_LIST)
 
                 drawer.closeDrawer(GravityCompat.START)
                 return true
@@ -324,13 +345,49 @@ class BoardActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelect
 
         var newIntent = Intent(this, BoardActivity::class.java)
         newIntent.putExtra("board", boards[boardId].id)
-        startActivity(newIntent)
+        startActivityForResult(newIntent, REQUEST_CODE_BOARD)
 
         drawer.closeDrawer(GravityCompat.START)
         return true
     }
 
+//    override fun onActivityReenter(resultCode: Int, data: Intent?) {
+//        super.onActivityReenter(resultCode, data)
+//    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+
+        if (resultCode == Activity.RESULT_OK) {
+            when(requestCode) {
+                REQUEST_CODE_BOARD -> {
+                    // TODO: check that no actions required
+                }
+                REQUEST_CODE_BOARDS_LIST -> {
+                    // refresh data (board list in drawer)
+                    refreshBoards()
+                    // TODO: make it safe
+                    recyclerView.adapter!!.notifyDataSetChanged() // danger, adapter may be null in come cases
+                }
+                REQUEST_CODE_LIB_FLOW -> {
+                    // TODO: check that no actions required
+                    // may be refresh templates
+                }
+                REQUEST_CODE_LIB_ADD -> {
+                    // refresh data (task list)
+                    refreshTaskAndTemplates()
+                    // TODO: make it safe
+                    recyclerView.adapter!!.notifyDataSetChanged() // danger, adapter may be null in come cases
+                }
+            }
+        } else {
+            Toast.makeText(this, "Wrong activity result", Toast.LENGTH_SHORT).show()
+        }
+    }
+
     override fun onBackPressed() {
         // to prev board?
+        var newIntent = Intent()
+        setResult(RESULT_OK, newIntent)
+        finish()
     }
 }
