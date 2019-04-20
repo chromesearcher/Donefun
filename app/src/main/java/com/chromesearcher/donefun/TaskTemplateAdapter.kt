@@ -8,7 +8,7 @@ import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import kotlinx.android.synthetic.main.task_template.view.*
+import kotlinx.android.synthetic.main.task_template_item.view.*
 
 class TaskTemplateAdapter (private val context: Context, private val templates: ArrayList<TaskTemplate>) : RecyclerView.Adapter<TaskTemplateAdapter.TaskTemplateViewHolder>() {
 
@@ -22,7 +22,7 @@ class TaskTemplateAdapter (private val context: Context, private val templates: 
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TaskTemplateViewHolder {
 
-        val view = LayoutInflater.from(context).inflate(R.layout.task_template, parent, false)
+        val view = LayoutInflater.from(context).inflate(R.layout.task_template_item, parent, false)
 
 //        view.setOnClickListener {
 //            val itemPosition =

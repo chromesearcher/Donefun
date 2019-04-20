@@ -31,6 +31,7 @@ class BoardActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelect
     private lateinit var toolbar: Toolbar
     private lateinit var drawerMenu: Menu
 
+    private val user: String = "bro"
     private lateinit var board: String
 
     private val templates: ArrayList<TaskTemplate> = ArrayList()
@@ -79,11 +80,11 @@ class BoardActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelect
     private val onItemLongClickListener: View.OnLongClickListener = View.OnLongClickListener {
 
         val viewHolder: RecyclerView.ViewHolder = it.tag as RecyclerView.ViewHolder
-        var pos = viewHolder.adapterPosition
+        val pos = viewHolder.adapterPosition
 
         //'DO U RLY WANT TO DELETE?' dialog
 
-        var builder = AlertDialog.Builder(this)
+        val builder = AlertDialog.Builder(this)
         builder.setTitle("Do you want to delete task?")
 
         builder.setPositiveButton("OK") { _, _ ->
@@ -121,6 +122,7 @@ class BoardActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelect
         toolbar = findViewById(R.id.toolbar_board)
         setSupportActionBar(toolbar)
 
+        // DRAWER setup
         val drawer = findViewById<DrawerLayout>(R.id.drawer_layout)
 
         val toggle = ActionBarDrawerToggle(this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close)
@@ -132,6 +134,7 @@ class BoardActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelect
 
         drawerMenu = navigationView.menu
 
+        // Acquire BOARDS
         db.collection(boardsCollection)
                 .get()
                 .addOnSuccessListener { docs ->
@@ -144,6 +147,7 @@ class BoardActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelect
                             this.title = name
                         }
 
+                        // TODO: add filter by user
                         boards.add(Board(name, actor, id))
                     }
 
@@ -151,9 +155,32 @@ class BoardActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelect
                     val item2 = drawerMenu.findItem(R.id.nav_board2)
                     val item3 = drawerMenu.findItem(R.id.nav_board3)
 
-                    item1.title = boards[0].name
-                    item2.title = boards[1].name
-                    item3.title = boards[2].name
+                    when(boards.size) {
+                        0 -> {
+                            // TODO: item1.setVisible(false)
+                            item1.title = "no board"
+                            item2.title = "no board"
+                            item3.title = "no board"
+                        }
+
+                        1 -> {
+                            item1.title = boards[0].name
+                            item2.title = "no board"
+                            item3.title = "no board"
+                        }
+
+                        2 -> {
+                            item1.title = boards[0].name
+                            item2.title = boards[1].name
+                            item3.title = "no board"
+                        }
+
+                        else -> {
+                            item1.title = boards[0].name
+                            item2.title = boards[1].name
+                            item3.title = boards[2].name
+                        }
+                    }
                 }
                 .addOnFailureListener { exc ->
                     Log.w(TAG, "Error getting boards: ", exc)
@@ -231,8 +258,6 @@ class BoardActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelect
         return true
     }
 
-
-
     override fun onOptionsItemSelected(item: MenuItem?): Boolean {
 
         if (item?.itemId == R.id.action_switch) {
@@ -246,6 +271,8 @@ class BoardActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelect
 
     override fun onNavigationItemSelected(item: MenuItem): Boolean {
 
+        val drawer = findViewById<DrawerLayout>(R.id.drawer_layout)
+
         // Handle navigation view item clicks here.
         val id = item.itemId
 
@@ -253,20 +280,45 @@ class BoardActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelect
 
         when (id) {
             R.id.nav_board1 -> {
+
+                if (boards.size == 0) {
+                    drawer.closeDrawer(GravityCompat.START)
+                    return true
+                }
+
                 // go to board 1
                 boardId = 0
             }
             R.id.nav_board2 -> {
+
+                if (boards.size == 1) {
+                    drawer.closeDrawer(GravityCompat.START)
+                    return true
+                }
+
                 // go to board 2
                 boardId = 1
             }
             R.id.nav_board3 -> {
+
+                if (boards.size == 2) {
+                    drawer.closeDrawer(GravityCompat.START)
+                    return true
+                }
+
                 // go to board 3
                 boardId = 2
             }
 
             R.id.nav_all_boards -> {
                 // go to boards screen
+
+                var newIntent = Intent(this, BoardsListActivity::class.java)
+                newIntent.putExtra("user", user)
+                startActivity(newIntent)
+
+                drawer.closeDrawer(GravityCompat.START)
+                return true
             }
         }
 
@@ -274,7 +326,6 @@ class BoardActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelect
         newIntent.putExtra("board", boards[boardId].id)
         startActivity(newIntent)
 
-        val drawer = findViewById<DrawerLayout>(R.id.drawer_layout)
         drawer.closeDrawer(GravityCompat.START)
         return true
     }
