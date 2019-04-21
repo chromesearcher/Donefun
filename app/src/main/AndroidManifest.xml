@@ -11,17 +11,20 @@
             android:theme="@style/AppTheme">
         <activity
             android:name=".LoginActivity"
-            android:label="@string/login_title">
+            android:label="@string/login_title"
+            >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
+
         </activity>
         <activity
             android:name=".BoardActivity"
             android:label="@string/board_title"
-            android:exported="true">
+            android:exported="true"
+            >
         </activity>
         <activity
             android:name=".LibActivity"
