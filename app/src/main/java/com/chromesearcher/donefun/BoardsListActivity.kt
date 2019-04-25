@@ -21,6 +21,7 @@ class BoardsListActivity: AppCompatActivity() {
     private lateinit var fabAddBoard: FloatingActionButton
 
     private lateinit var user: String
+    private lateinit var board: String // board.id of source board, not board.name
 
     private val boards: ArrayList<Board> = ArrayList()
 
@@ -54,7 +55,7 @@ class BoardsListActivity: AppCompatActivity() {
                     .update("name", input.text.toString())
                     .addOnSuccessListener {
                         val newBoard = Board(input.text.toString(), oldActor, oldId)
-                        boards.set(pos, newBoard)
+                        boards[pos] = newBoard
 
                         Log.d(TAG, "DocumentSnapshot (board) successfully written!")
 
@@ -79,6 +80,11 @@ class BoardsListActivity: AppCompatActivity() {
         var builder = AlertDialog.Builder(this)
         builder.setTitle("Do you want to delete board?")
         builder.setPositiveButton("OK") { _, _ ->
+
+            if (boards[pos].id == "main") {
+                Toast.makeText(applicationContext, "main board cannot be deleted", Toast.LENGTH_SHORT).show()
+                return@setPositiveButton
+            }
 
             // delete the board from DB
             db.collection(boardsCollection).document(boards[pos].id)
@@ -105,6 +111,7 @@ class BoardsListActivity: AppCompatActivity() {
         setContentView(R.layout.activity_boards_list)
 
         user = intent.getStringExtra("user")
+        board = intent.getStringExtra("board")
 
         initFab()
         initRecyclerView()
@@ -180,6 +187,21 @@ class BoardsListActivity: AppCompatActivity() {
 
     override fun onBackPressed() {
         var newIntent = Intent()
+
+        var isDeleted = false
+        var sourceBoard: Board = boards[0]
+
+        for (b in boards) {
+            if (b.id == board) {
+                sourceBoard = b
+            }
+        }
+
+        if (!boards.contains(sourceBoard)) {
+            isDeleted = true
+        }
+
+        newIntent.putExtra("is_deleted", isDeleted)
         setResult(RESULT_OK, newIntent)
         finish()
     }

@@ -1,25 +1,20 @@
 package com.chromesearcher.donefun
 
-import android.content.Context
+import android.content.Intent
 import android.os.Bundle
 import android.support.design.widget.FloatingActionButton
+import android.support.v7.app.AlertDialog
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
+import android.text.InputType
 import android.util.Log
 import android.view.View
-import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.Source
-import android.content.Context.INPUT_METHOD_SERVICE
-import android.content.DialogInterface
-import android.content.Intent
-import android.support.v4.content.ContextCompat.getSystemService
-import android.support.v7.app.AlertDialog
-import android.text.InputType
-import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
 import android.widget.Toast
-
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.Source
+import com.google.firebase.database.ServerValue
 
 
 class LibActivity: AppCompatActivity() {
@@ -28,6 +23,7 @@ class LibActivity: AppCompatActivity() {
     private lateinit var fabAdd: FloatingActionButton
 
     // source board which asked for new Tasks (used in ADD mode)
+    // thats board.id, not board.name
     private lateinit var board: String
     private var nSelected: Int = 0
 
@@ -36,7 +32,7 @@ class LibActivity: AppCompatActivity() {
     private val TAG: String = "myLogs"
     private var addMode: Boolean = false
 
-    private val tasksCollection: String = "taskInstances"
+    private val tasksCollection: String = "tasks"
     private val templatesCollection: String = "taskTypes"
 
     private val db: FirebaseFirestore = FirebaseFirestore.getInstance()
@@ -193,6 +189,9 @@ class LibActivity: AppCompatActivity() {
                             data["board"] = board
                             data["status"] = "IN PROGRESS"
                             data["typeId"] = template.id
+
+                            val dateCreated = ServerValue.TIMESTAMP
+                            data["date_created"] = dateCreated
 
                             db.collection(tasksCollection)
                                 .add(data)

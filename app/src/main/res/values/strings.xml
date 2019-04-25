@@ -6,7 +6,7 @@
     <string name="actorname">Bro</string>
     <string name="login_title">LOGIN</string>
     <string name="lib_title">Lib</string>
-    <string name="board_title">Main board</string>
+    <string name="board_title"> </string>
     <string name="boardslist_title">All boards</string>
     <string name="switch_title">Switch</string>
     <string name="header1">Android Studio</string>

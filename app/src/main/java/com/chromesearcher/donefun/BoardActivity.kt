@@ -32,13 +32,14 @@ class BoardActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelect
     private lateinit var drawerMenu: Menu
 
     private val user: String = "bro"
-    private lateinit var board: String
+    private val DEFAULT_BOARD_ID: String = "main"
+    private lateinit var board: String // this is board.id actually, not board.name
 
     private val templates: ArrayList<TaskTemplate> = ArrayList()
     private val tasks: ArrayList<Task> = ArrayList()
     private val boards: ArrayList<Board> = ArrayList()
 
-    private val tasksCollection: String = "taskInstances"
+    private val tasksCollection: String = "tasks"
     private val templatesCollection: String = "taskTypes"
     private val boardsCollection: String = "boards"
 
@@ -60,6 +61,7 @@ class BoardActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelect
         val id = item.id
         val status = item.status
         val template = item.template
+        val dateCreated = item.dateCreated
 
         val newStatus = if (status == "IN PROGRESS") "DONE" else "IN PROGRESS"
 
@@ -69,7 +71,7 @@ class BoardActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelect
         db.collection(tasksCollection).document(id)
                 .update("status", newStatus)
                 .addOnSuccessListener {
-                    val newTask = Task(newStatus, template, id)
+                    val newTask = Task(newStatus, template, id, dateCreated)
                     tasks[pos] = newTask
 
                     Log.d(TAG, "DocumentSnapshot (task) successfully written|updated!")
@@ -172,19 +174,19 @@ class BoardActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelect
         when(boards.size) {
             0 -> {
                 // TODO: change to: item1.setVisible(false)
-                item1.title = "no board"
-                item2.title = "no board"
-                item3.title = "no board"
+                item1.title = "<no board>"
+                item2.title = item1.title
+                item3.title = item1.title
             }
             1 -> {
                 item1.title = boards[0].name
-                item2.title = "no board"
-                item3.title = "no board"
+                item2.title = "<no board>"
+                item3.title = item2.title
             }
             2 -> {
                 item1.title = boards[0].name
                 item2.title = boards[1].name
-                item3.title = "no board"
+                item3.title = "<no board>"
             }
             else -> {
                 item1.title = boards[0].name
@@ -266,17 +268,20 @@ class BoardActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelect
                     }
 
                     db.collection(tasksCollection)
-                            .whereEqualTo("board", board)
+                            .whereEqualTo("board", board).orderBy("date_created")
                             .get()
-                            .addOnSuccessListener { docs ->
-                                for (doc in docs) {
+                            .addOnSuccessListener { docsT ->
+                                for (doc in docsT) {
                                     val status = doc.data["status"] as String
                                     val typeId = doc.data["typeId"] as String
+                                    val dateCreated = doc.data["date_created"] as Map<String, String>
                                     val id = doc.id
+
+                                    Log.d(TAG, dateCreated[".sv"]) // "timestamp" always
 
                                     for (t in templates) {
                                         if (t.id == typeId) {
-                                            tasks.add(Task(status, t, id))
+                                            tasks.add(Task(status, t, id, dateCreated))
                                         }
                                     }
                                 }
@@ -286,7 +291,7 @@ class BoardActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelect
                                 recyclerView.adapter!!.notifyDataSetChanged() // danger, adapter may be null in come cases
                             }
                             .addOnFailureListener { exc ->
-                                Log.w(TAG, "Error getting taskInstances: ", exc)
+                                Log.w(TAG, "Error getting tasks: ", exc)
                             }
                 }
                 .addOnFailureListener {exc ->
@@ -306,7 +311,6 @@ class BoardActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelect
         if (item?.itemId == R.id.action_switch) {
             val newIntent = Intent(this, LibActivity::class.java)
             newIntent.putExtra("mode", "LIB")
-            newIntent.putExtra("board", board)
             startActivityForResult(newIntent, REQUEST_CODE_LIB_FLOW)
         }
         return true
@@ -358,11 +362,17 @@ class BoardActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelect
 
                 var newIntent = Intent(this, BoardsListActivity::class.java)
                 newIntent.putExtra("user", user)
+                newIntent.putExtra("board", board)
                 startActivityForResult(newIntent, REQUEST_CODE_BOARDS_LIST)
 
                 drawer.closeDrawer(GravityCompat.START)
                 return true
             }
+        }
+
+        if (boards[boardId].id == board) {
+            drawer.closeDrawer(GravityCompat.START)
+            return true
         }
 
         var newIntent = Intent(this, BoardActivity::class.java)
@@ -385,8 +395,20 @@ class BoardActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelect
                     // TODO: check that no actions required
                 }
                 REQUEST_CODE_BOARDS_LIST -> {
-                    // refresh data (board list in drawer)
-                    refreshBoards()
+
+                    val isDeleted = data?.getBooleanExtra("is_deleted", false)
+
+                    // TODO: make safe
+                    if (isDeleted!!) {
+                        // TODO: get it from memory, not create once again
+                        // go to main board
+                        var newIntent = Intent(this, BoardActivity::class.java)
+                        newIntent.putExtra("board", DEFAULT_BOARD_ID)
+                        startActivityForResult(newIntent, REQUEST_CODE_BOARD)
+                    } else {
+                        // refresh data (board list in drawer)
+                        refreshBoards()
+                    }
                 }
                 REQUEST_CODE_LIB_FLOW -> {
                     // TODO: check that no actions required
