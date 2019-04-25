@@ -126,6 +126,30 @@ class BoardActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelect
         toolbar = findViewById(R.id.toolbar_board)
         setSupportActionBar(toolbar)
 
+        initFab()
+
+        initDrawer()
+        initDrawerMenu()
+        downloadBoards()
+
+        initRecyclerView()
+        downloadTasksAndTemplates()
+    }
+
+    private fun initFab() {
+        fabAddTask = findViewById(R.id.fabAddTask)
+        fabAddTask.setOnClickListener {
+            Toast.makeText(applicationContext, "FUK U", Toast.LENGTH_SHORT).show()
+
+            // invoke LibActivity
+            var newIntent = Intent(this, LibActivity::class.java)
+            newIntent.putExtra("mode", "ADD")
+            newIntent.putExtra("board", board)
+            startActivityForResult(newIntent, REQUEST_CODE_LIB_ADD)
+        }
+    }
+
+    private fun initDrawer() {
         // DRAWER setup
         val drawer = findViewById<DrawerLayout>(R.id.drawer_layout)
 
@@ -137,22 +161,52 @@ class BoardActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelect
         navigationView.setNavigationItemSelectedListener(this)
 
         drawerMenu = navigationView.menu
-
-        downloadBoards()
-
-        fabAddTask = findViewById(R.id.fabAddTask)
-        fabAddTask.setOnClickListener {
-            Toast.makeText(applicationContext, "FUK U", Toast.LENGTH_SHORT).show()
-
-            // invoke LibActivity
-            var newIntent = Intent(this, LibActivity::class.java)
-            newIntent.putExtra("mode", "ADD")
-            newIntent.putExtra("board", board)
-            startActivityForResult(newIntent, REQUEST_CODE_LIB_ADD)
-        }
-
-        downloadTasksAndTemplates()
     }
+
+    private fun initDrawerMenu() {
+        // init menu (with boards)
+        val item1 = drawerMenu.findItem(R.id.nav_board1)
+        val item2 = drawerMenu.findItem(R.id.nav_board2)
+        val item3 = drawerMenu.findItem(R.id.nav_board3)
+
+        when(boards.size) {
+            0 -> {
+                // TODO: change to: item1.setVisible(false)
+                item1.title = "no board"
+                item2.title = "no board"
+                item3.title = "no board"
+            }
+            1 -> {
+                item1.title = boards[0].name
+                item2.title = "no board"
+                item3.title = "no board"
+            }
+            2 -> {
+                item1.title = boards[0].name
+                item2.title = boards[1].name
+                item3.title = "no board"
+            }
+            else -> {
+                item1.title = boards[0].name
+                item2.title = boards[1].name
+                item3.title = boards[2].name
+            }
+        }
+    }
+
+    private fun initRecyclerView() {
+        // init recyclerview (with tasks)
+        recyclerView = findViewById(R.id.tasks_recycler_view)
+        recyclerView.layoutManager = LinearLayoutManager(this)
+//      recyclerView.addItemDecoration(MarginItemDecoration(resources.getDimension(R.dimen.default_padding).toInt()))
+
+        val myAdapter = TaskAdapter(this, tasks)
+        recyclerView.adapter = myAdapter
+
+        myAdapter.setOnItemClickListener(onItemClickListener)
+        myAdapter.setOnItemLongClickListener(onItemLongClickListener)
+    }
+
 
     private fun refreshBoards() {
         boards.clear()
@@ -177,33 +231,8 @@ class BoardActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelect
                         boards.add(Board(name, actor, id))
                     }
 
-                    val item1 = drawerMenu.findItem(R.id.nav_board1)
-                    val item2 = drawerMenu.findItem(R.id.nav_board2)
-                    val item3 = drawerMenu.findItem(R.id.nav_board3)
-
-                    when(boards.size) {
-                        0 -> {
-                            // TODO: change to: item1.setVisible(false)
-                            item1.title = "no board"
-                            item2.title = "no board"
-                            item3.title = "no board"
-                        }
-                        1 -> {
-                            item1.title = boards[0].name
-                            item2.title = "no board"
-                            item3.title = "no board"
-                        }
-                        2 -> {
-                            item1.title = boards[0].name
-                            item2.title = boards[1].name
-                            item3.title = "no board"
-                        }
-                        else -> {
-                            item1.title = boards[0].name
-                            item2.title = boards[1].name
-                            item3.title = boards[2].name
-                        }
-                    }
+                    // notify menu (reinit)
+                    initDrawerMenu()
                 }
                 .addOnFailureListener { exc ->
                     Log.w(TAG, "Error getting boards: ", exc)
@@ -211,7 +240,7 @@ class BoardActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelect
     }
 
     private fun refreshTaskAndTemplates() {
-        // may be optimized
+        // TODO: may be optimized
         tasks.clear()
         templates.clear()
         downloadTasksAndTemplates()
@@ -250,18 +279,11 @@ class BoardActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelect
                                             tasks.add(Task(status, t, id))
                                         }
                                     }
-
-                                    recyclerView = findViewById(R.id.tasks_recycler_view)
-                                    recyclerView.layoutManager = LinearLayoutManager(this)
-//                                    recyclerView.addItemDecoration(MarginItemDecoration(resources.getDimension(R.dimen.default_padding).toInt()))
-
-                                    val myAdapter = TaskAdapter(this, tasks)
-                                    recyclerView.adapter = myAdapter
-
-                                    myAdapter.setOnItemClickListener(onItemClickListener)
-                                    myAdapter.setOnItemLongClickListener(onItemLongClickListener)
-
                                 }
+
+                                // refresh recyclerview with loaded data
+                                // TODO: make it safe
+                                recyclerView.adapter!!.notifyDataSetChanged() // danger, adapter may be null in come cases
                             }
                             .addOnFailureListener { exc ->
                                 Log.w(TAG, "Error getting taskInstances: ", exc)
@@ -365,8 +387,6 @@ class BoardActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelect
                 REQUEST_CODE_BOARDS_LIST -> {
                     // refresh data (board list in drawer)
                     refreshBoards()
-                    // TODO: make it safe
-                    recyclerView.adapter!!.notifyDataSetChanged() // danger, adapter may be null in come cases
                 }
                 REQUEST_CODE_LIB_FLOW -> {
                     // TODO: check that no actions required
@@ -375,8 +395,6 @@ class BoardActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelect
                 REQUEST_CODE_LIB_ADD -> {
                     // refresh data (task list)
                     refreshTaskAndTemplates()
-                    // TODO: make it safe
-                    recyclerView.adapter!!.notifyDataSetChanged() // danger, adapter may be null in come cases
                 }
             }
         } else {

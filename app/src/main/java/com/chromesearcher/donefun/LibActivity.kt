@@ -135,41 +135,53 @@ class LibActivity: AppCompatActivity() {
 
         board = intent.getStringExtra("board")
 
+        initRecyclerView()
+        downloadTemplates()
+
+        initFab()
+    }
+
+    private fun initRecyclerView() {
+        recyclerView = findViewById(R.id.task_template_rv)
+        recyclerView.layoutManager = LinearLayoutManager(this)
+
+        val myAdapter = TaskTemplateAdapter(this, templates)
+        recyclerView.adapter = myAdapter
+
+        myAdapter.setOnItemClickListener(onItemClickListener)
+        myAdapter.setOnItemLongClickListener(onItemLongClickListener)
+    }
+
+    private fun downloadTemplates() {
         // Acquire Templates (all)
         db.collection(templatesCollection).get(source)
-                .addOnSuccessListener { docs ->
-                    for (doc in docs) {
-                        val iconId = (doc.data["iconId"] as String).toInt()
-                        val text = doc.data["name"] as String
-                        val id = doc.id
-                        var icon: Int = 0
+            .addOnSuccessListener { docs ->
+                for (doc in docs) {
+                    val iconId = (doc.data["iconId"] as String).toInt()
+                    val text = doc.data["name"] as String
+                    val id = doc.id
+                    var icon: Int = 0
 
-                        when (iconId) {
-                            0 -> icon = R.drawable.ic_baseline_build_24px
-                            1 -> icon = R.drawable.ic_shopping_cart_black_24dp
-                            2 -> icon = R.drawable.ic_wc_black_24dp
-                        }
-                        templates.add(SelectableTaskTemplate(icon, text, id, false))
+                    when (iconId) {
+                        0 -> icon = R.drawable.ic_baseline_build_24px
+                        1 -> icon = R.drawable.ic_shopping_cart_black_24dp
+                        2 -> icon = R.drawable.ic_wc_black_24dp
                     }
-
-                    recyclerView = findViewById(R.id.task_template_rv)
-                    recyclerView.layoutManager = LinearLayoutManager(this)
-
-                    val myAdapter = TaskTemplateAdapter(this, templates)
-                    recyclerView.adapter = myAdapter
-
-                    myAdapter.setOnItemClickListener(onItemClickListener)
-                    myAdapter.setOnItemLongClickListener(onItemLongClickListener)
-                }
-                .addOnFailureListener {exc ->
-                    Log.w(TAG, "ERROR getting templates: ", exc)
+                    templates.add(SelectableTaskTemplate(icon, text, id, false))
                 }
 
+                // TODO: make it safe
+                recyclerView.adapter!!.notifyDataSetChanged() // danger, adapter may be null in come cases
+            }
+            .addOnFailureListener {exc ->
+                Log.w(TAG, "ERROR getting templates: ", exc)
+            }
+    }
+
+    private fun initFab() {
         fabAdd = findViewById(R.id.fabAdd)
         fabAdd.setOnClickListener {
-
-            if (addMode) {
-
+            if (addMode) { // ADD TASK flow
                 // DO YOU REALLY WANNA SUBMIT CHOICE' dialog
                 var builder = AlertDialog.Builder(this)
                 builder.setTitle("Do you want to submit choice?")
@@ -183,30 +195,28 @@ class LibActivity: AppCompatActivity() {
                             data["typeId"] = template.id
 
                             db.collection(tasksCollection)
-                                    .add(data)
-                                    .addOnSuccessListener { docRef ->
-                                        Log.d(TAG, "DocumentSnapshot written with ID: ${docRef.id}")
-                                    }
-                                    .addOnFailureListener { e ->
-                                        Log.w(TAG, "Error adding new Task", e)
-                                    }
+                                .add(data)
+                                .addOnSuccessListener { docRef ->
+                                    Log.d(TAG, "DocumentSnapshot written with ID: ${docRef.id}")
+                                }
+                                .addOnFailureListener { e ->
+                                    Log.w(TAG, "Error adding new Task", e)
+                                }
                         }
                     }
+
+                    // TODO: do we need to wait until all ADD TO DB threads are over?
                     // return to Board screen
                     var newIntent = Intent()
                     setResult(RESULT_OK, newIntent)
                     finish() // back to previous activity
                 }
-
                 builder.setNegativeButton("CANCEL") { _, _ ->
                     Toast.makeText(applicationContext, "FUK U", Toast.LENGTH_SHORT).show()
                 }
                 builder.show()
 
-                // TODO: do we need to wait until all ADD TO DB threads are over?
-
             } else { // LIB flow
-
                 var builder = AlertDialog.Builder(this)
                 builder.setTitle("Add template")
 
@@ -220,13 +230,13 @@ class LibActivity: AppCompatActivity() {
 
                     // push new data to DB
                     db.collection(templatesCollection)
-                            .add(data)
-                            .addOnSuccessListener { docRef ->
-                                templates.add(SelectableTaskTemplate(0, input.text.toString(), docRef.id, false))
+                        .add(data)
+                        .addOnSuccessListener { docRef ->
+                            templates.add(SelectableTaskTemplate(0, input.text.toString(), docRef.id, false))
 
-                                // TODO: make it safe
-                                recyclerView.adapter!!.notifyDataSetChanged() // danger, adapter may be null in come cases
-                            }
+                            // TODO: make it safe
+                            recyclerView.adapter!!.notifyDataSetChanged() // danger, adapter may be null in come cases
+                        }
                 }
                 builder.setNegativeButton("CANCEL") { _, _ ->
                     Toast.makeText(applicationContext, "FUK U", Toast.LENGTH_SHORT).show()

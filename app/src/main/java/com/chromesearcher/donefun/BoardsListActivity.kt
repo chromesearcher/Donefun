@@ -106,6 +106,46 @@ class BoardsListActivity: AppCompatActivity() {
 
         user = intent.getStringExtra("user")
 
+        initFab()
+        initRecyclerView()
+
+        downloadBoards()
+    }
+
+    private fun downloadBoards() {
+        db.collection(boardsCollection)
+            .get()
+            .addOnSuccessListener { docs ->
+                for (doc in docs) {
+                    val actor = doc.data["actor"] as String
+                    val name = doc.data["name"] as String
+                    val id = doc.id
+
+                    // TODO: filter by user
+                    boards.add(Board(name, actor, id))
+                }
+
+                // TODO: make it safe
+                recyclerView.adapter!!.notifyDataSetChanged() // danger, adapter may be null in come cases
+            }
+            .addOnFailureListener { exc ->
+                Log.w(TAG, "Error getting boards: ", exc)
+            }
+    }
+
+    private fun initRecyclerView() {
+        recyclerView = findViewById(R.id.boards_rv)
+        recyclerView.layoutManager = LinearLayoutManager(this)
+        recyclerView.addItemDecoration(MarginItemDecoration(resources.getDimension(R.dimen.default_padding).toInt()))
+
+        val myAdapter = BoardAdapter(this, boards)
+        recyclerView.adapter = myAdapter
+
+        myAdapter.setOnItemClickListener(onItemClickListener)
+        myAdapter.setOnItemLongClickListener(onItemLongClickListener)
+    }
+
+    private fun initFab() {
 
         fabAddBoard = findViewById(R.id.fabAddBoard)
         fabAddBoard.setOnClickListener {
@@ -123,45 +163,19 @@ class BoardsListActivity: AppCompatActivity() {
 
                 // push new data to DB
                 db.collection(boardsCollection)
-                        .add(data)
-                        .addOnSuccessListener { docRef ->
-                            boards.add(Board(input.text.toString(), user, docRef.id))
+                    .add(data)
+                    .addOnSuccessListener { docRef ->
+                        boards.add(Board(input.text.toString(), user, docRef.id))
 
-                            // TODO: make it safe
-                            recyclerView.adapter!!.notifyDataSetChanged() // danger, adapter may be null in come cases
-                        }
+                        // TODO: make it safe
+                        recyclerView.adapter!!.notifyDataSetChanged() // danger, adapter may be null in come cases
+                    }
             }
             builder.setNegativeButton("CANCEL") { _, _ ->
                 Toast.makeText(applicationContext, "FUK U", Toast.LENGTH_SHORT).show()
             }
             builder.show()
         }
-
-        db.collection(boardsCollection)
-                .get()
-                .addOnSuccessListener { docs ->
-                    for (doc in docs) {
-                        val actor = doc.data["actor"] as String
-                        val name = doc.data["name"] as String
-                        val id = doc.id
-
-                        // TODO: filter by user
-                        boards.add(Board(name, actor, id))
-                    }
-
-                    recyclerView = findViewById(R.id.boards_rv)
-                    recyclerView.layoutManager = LinearLayoutManager(this)
-                    recyclerView.addItemDecoration(MarginItemDecoration(resources.getDimension(R.dimen.default_padding).toInt()))
-
-                    val myAdapter = BoardAdapter(this, boards)
-                    recyclerView.adapter = myAdapter
-
-                    myAdapter.setOnItemClickListener(onItemClickListener)
-                    myAdapter.setOnItemLongClickListener(onItemLongClickListener)
-                }
-                .addOnFailureListener { exc ->
-                    Log.w(TAG, "Error getting boards: ", exc)
-                }
     }
 
     override fun onBackPressed() {

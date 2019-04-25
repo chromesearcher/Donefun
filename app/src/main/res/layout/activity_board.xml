@@ -35,7 +35,7 @@
             android:layout_gravity="bottom|end"
             android:layout_marginEnd="16dp"
             android:layout_marginBottom="16dp"
-            android:src="@drawable/ic_action_name"
+            android:src="@drawable/ic_add_black_24dp"
             android:scaleType="center"
             app:backgroundTint="#9ACD32"
             app:elevation="10dp"
