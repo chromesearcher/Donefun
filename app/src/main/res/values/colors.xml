@@ -5,4 +5,8 @@
     <color name="background_holo_light">#fff3f3f3</color>
     <color name="background_holo_dark">#ff000000</color>
     <color name="colorAccent">#e30425</color>
+    <color name="colorPrimary">#fca832</color>
+    <color name="colorLight">#ffe54c</color>
+    <color name="colorDark">#fc6532</color>
+    <color name="colorTask">#bec5b7</color>
 </resources>

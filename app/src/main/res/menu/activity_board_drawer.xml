@@ -22,5 +22,4 @@
                 android:title="@string/nav_add_board2" />
         </menu>
     </item>
-
 </menu>

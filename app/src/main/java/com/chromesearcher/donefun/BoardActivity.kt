@@ -200,7 +200,8 @@ class BoardActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelect
         // init recyclerview (with tasks)
         recyclerView = findViewById(R.id.tasks_recycler_view)
         recyclerView.layoutManager = LinearLayoutManager(this)
-//      recyclerView.addItemDecoration(MarginItemDecoration(resources.getDimension(R.dimen.default_padding).toInt()))
+        recyclerView.setHasFixedSize(true)
+        recyclerView.addItemDecoration(MarginItemDecoration(resources.getDimension(R.dimen.default_padding).toInt()))
 
         val myAdapter = TaskAdapter(this, tasks)
         recyclerView.adapter = myAdapter
@@ -312,6 +313,7 @@ class BoardActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelect
         if (item?.itemId == R.id.action_switch) {
             val newIntent = Intent(this, LibActivity::class.java)
             newIntent.putExtra("mode", "LIB")
+            newIntent.putExtra("board", board)
             startActivityForResult(newIntent, REQUEST_CODE_LIB_FLOW)
         }
         return true

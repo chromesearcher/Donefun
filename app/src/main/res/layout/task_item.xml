@@ -4,7 +4,6 @@
         xmlns:app="http://schemas.android.com/apk/res-auto" xmlns:tools="http://schemas.android.com/tools"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="#6200ee"
 >
 
     <ImageView
@@ -24,7 +23,7 @@
             android:gravity="center"
             android:textSize="30dp"
             android:text="@string/task_name"
-            android:textColor="#FFFFFF"
+            android:textColor="@color/background_holo_dark"
 
             app:layout_constraintStart_toStartOf="@id/task_imageView"
             app:layout_constraintEnd_toEndOf="@id/status_textview"

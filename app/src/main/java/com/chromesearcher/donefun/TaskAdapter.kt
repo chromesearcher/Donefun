@@ -1,6 +1,9 @@
 package com.chromesearcher.donefun
 
 import android.content.Context
+import android.graphics.Color
+import android.graphics.drawable.ColorDrawable
+import android.support.constraint.ConstraintLayout
 import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
@@ -29,6 +32,9 @@ class TaskAdapter (private val context: Context, private val tasks: ArrayList<Ta
         holder.taskNameTextView.text = tasks[position].template.text
         holder.taskImageView.setImageResource(tasks[position].template.iconId)
         holder.statusTextView.text = tasks[position].status
+
+        val parent = holder.taskImageView.parent as ConstraintLayout
+        parent.background = ColorDrawable(Color.WHITE)
     }
 
     fun setOnItemClickListener(itemClickListener: View.OnClickListener) {

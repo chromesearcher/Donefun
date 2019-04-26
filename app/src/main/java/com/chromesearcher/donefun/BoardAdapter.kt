@@ -1,6 +1,9 @@
 package com.chromesearcher.donefun
 
 import android.content.Context
+import android.graphics.Color
+import android.graphics.drawable.ColorDrawable
+import android.support.constraint.ConstraintLayout
 import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
@@ -27,6 +30,9 @@ class BoardAdapter (private val context: Context, private val boards: ArrayList<
     override fun onBindViewHolder(holder: BoardViewHolder, position: Int) {
         holder.boardNameTextView.text = boards[position].name
         holder.actorNameTextView.text = boards[position].actor
+
+        val parent = holder.boardNameTextView.parent as ConstraintLayout
+        parent.background = ColorDrawable(Color.WHITE)
     }
 
     fun setOnItemClickListener(itemClickListener: View.OnClickListener) {

@@ -140,6 +140,8 @@ class LibActivity: AppCompatActivity() {
     private fun initRecyclerView() {
         recyclerView = findViewById(R.id.task_template_rv)
         recyclerView.layoutManager = LinearLayoutManager(this)
+        recyclerView.addItemDecoration(MarginItemDecoration(resources.getDimension(R.dimen.default_padding).toInt()))
+        recyclerView.setHasFixedSize(true)
 
         val myAdapter = TaskTemplateAdapter(this, templates)
         recyclerView.adapter = myAdapter

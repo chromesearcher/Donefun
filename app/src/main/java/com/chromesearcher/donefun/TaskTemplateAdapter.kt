@@ -44,7 +44,7 @@ class TaskTemplateAdapter (private val context: Context, private val templates: 
         val parent = holder.taskTemplateNameTextView.parent as ConstraintLayout
 
         if (template.selected) {
-            parent.background = ColorDrawable(Color.parseColor("#80deea"))
+            parent.background = ColorDrawable(context.resources.getColor(R.color.colorPrimary))
         } else {
             parent.background = ColorDrawable(Color.WHITE)
         }

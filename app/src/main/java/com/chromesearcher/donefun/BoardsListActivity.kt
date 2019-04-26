@@ -178,6 +178,7 @@ class BoardsListActivity: AppCompatActivity() {
         recyclerView = findViewById(R.id.boards_rv)
         recyclerView.layoutManager = LinearLayoutManager(this)
         recyclerView.addItemDecoration(MarginItemDecoration(resources.getDimension(R.dimen.default_padding).toInt()))
+        recyclerView.setHasFixedSize(true)
 
         val myAdapter = BoardAdapter(this, boards)
         recyclerView.adapter = myAdapter
