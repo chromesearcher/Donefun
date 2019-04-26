@@ -102,10 +102,29 @@ class BoardsListActivity: AppCompatActivity() {
 
                         // TODO: make it safe
                         recyclerView.adapter!!.notifyDataSetChanged() // danger, adapter may be null in come cases
+
+                        // delete tasks of the deleted board
+                        db.collection(tasksCollection)
+                            .whereEqualTo("board", boards[pos].id)
+                            .get()
+                            .addOnSuccessListener { docsT ->
+                                for (doc in docsT) {
+                                    val taskId = doc.id
+
+                                    // delete a task from DB
+                                    db.collection(tasksCollection).document(taskId)
+                                        .delete()
+                                        .addOnSuccessListener {
+                                            Log.d(TAG, "task successfully deleted from DB!")
+                                        }
+                                        .addOnFailureListener { e -> Log.w(TAG, "Error deleting task", e) }
+                                }
+                            }
+                            .addOnFailureListener { exc ->
+                                Log.w(TAG, "Error getting tasks (delete board flow): ", exc)
+                            }
                     }
                     .addOnFailureListener { e -> Log.w(TAG, "Error deleting board", e) }
-
-//            db.collection()
         }
         builder.setNegativeButton("CANCEL") { _, _ ->
             Toast.makeText(applicationContext, "FUK U", Toast.LENGTH_SHORT).show()

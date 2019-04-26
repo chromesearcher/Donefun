@@ -217,7 +217,7 @@ class BoardActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelect
 
     private fun downloadBoards() {
         // Acquire BOARDS
-        db.collection(boardsCollection)
+        db.collection(boardsCollection).whereEqualTo("actor", user)
                 .get()
                 .addOnSuccessListener { docs ->
                     for (doc in docs) {
@@ -249,6 +249,7 @@ class BoardActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelect
     }
 
     private fun downloadTasksAndTemplates() {
+        // TODO: download templates only for current user
         db.collection(templatesCollection)
                 .get()
                 .addOnSuccessListener { docs ->
