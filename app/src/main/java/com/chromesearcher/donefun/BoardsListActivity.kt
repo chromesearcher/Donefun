@@ -21,7 +21,7 @@ class BoardsListActivity: AppCompatActivity() {
     private lateinit var fabAddBoard: FloatingActionButton
 
     private lateinit var user: String
-    private lateinit var board: String // board.id of source board, not board.name
+    private lateinit var sourceBoard: Board
 
     private val boards: ArrayList<Board> = ArrayList()
 
@@ -29,6 +29,7 @@ class BoardsListActivity: AppCompatActivity() {
     private val source = Source.DEFAULT // TODO: use this in DB calls
 
     private val boardsCollection: String = "boards"
+    private val tasksCollection: String = "tasks"
 
     private val TAG: String = "myLogs"
 
@@ -50,6 +51,12 @@ class BoardsListActivity: AppCompatActivity() {
         builder.setTitle("Edit board name")
         builder.setView(input)
         builder.setPositiveButton("OK") { _, _ ->
+
+            if (boards[pos].id == "main") {
+                Toast.makeText(applicationContext, "main board cannot be renamed", Toast.LENGTH_SHORT).show()
+                return@setPositiveButton
+            }
+
             // push data to DB (update board data)
             db.collection(boardsCollection).document(oldId)
                     .update("name", input.text.toString())
@@ -97,6 +104,8 @@ class BoardsListActivity: AppCompatActivity() {
                         recyclerView.adapter!!.notifyDataSetChanged() // danger, adapter may be null in come cases
                     }
                     .addOnFailureListener { e -> Log.w(TAG, "Error deleting board", e) }
+
+//            db.collection()
         }
         builder.setNegativeButton("CANCEL") { _, _ ->
             Toast.makeText(applicationContext, "FUK U", Toast.LENGTH_SHORT).show()
@@ -111,7 +120,6 @@ class BoardsListActivity: AppCompatActivity() {
         setContentView(R.layout.activity_boards_list)
 
         user = intent.getStringExtra("user")
-        board = intent.getStringExtra("board")
 
         initFab()
         initRecyclerView()
@@ -120,7 +128,7 @@ class BoardsListActivity: AppCompatActivity() {
     }
 
     private fun downloadBoards() {
-        db.collection(boardsCollection)
+        db.collection(boardsCollection).whereEqualTo("actor", user)
             .get()
             .addOnSuccessListener { docs ->
                 for (doc in docs) {
@@ -130,6 +138,13 @@ class BoardsListActivity: AppCompatActivity() {
 
                     // TODO: filter by user
                     boards.add(Board(name, actor, id))
+                }
+
+                // init source board
+                for (b in boards) {
+                    if (b.id == intent.getStringExtra("board")) {
+                        sourceBoard = b
+                    }
                 }
 
                 // TODO: make it safe
@@ -189,13 +204,6 @@ class BoardsListActivity: AppCompatActivity() {
         var newIntent = Intent()
 
         var isDeleted = false
-        var sourceBoard: Board = boards[0]
-
-        for (b in boards) {
-            if (b.id == board) {
-                sourceBoard = b
-            }
-        }
 
         if (!boards.contains(sourceBoard)) {
             isDeleted = true

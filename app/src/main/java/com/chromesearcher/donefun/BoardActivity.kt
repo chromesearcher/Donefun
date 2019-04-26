@@ -375,6 +375,7 @@ class BoardActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelect
             return true
         }
 
+        // TODO: get it from memory, not create activity once again
         var newIntent = Intent(this, BoardActivity::class.java)
         newIntent.putExtra("board", boards[boardId].id)
         startActivityForResult(newIntent, REQUEST_CODE_BOARD)
@@ -382,10 +383,6 @@ class BoardActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelect
         drawer.closeDrawer(GravityCompat.START)
         return true
     }
-
-//    override fun onActivityReenter(resultCode: Int, data: Intent?) {
-//        super.onActivityReenter(resultCode, data)
-//    }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
 
@@ -400,7 +397,7 @@ class BoardActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelect
 
                     // TODO: make safe
                     if (isDeleted!!) {
-                        // TODO: get it from memory, not create once again
+                        // TODO: get it from memory, not create activity once again
                         // go to main board
                         var newIntent = Intent(this, BoardActivity::class.java)
                         newIntent.putExtra("board", DEFAULT_BOARD_ID)
