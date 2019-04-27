@@ -22,6 +22,7 @@ import io.fabric.sdk.android.Fabric
 import android.support.v4.view.GravityCompat
 import android.support.v4.widget.DrawerLayout
 import android.support.v7.app.ActionBarDrawerToggle
+import android.support.v7.widget.DefaultItemAnimator
 
 
 class BoardActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener {
@@ -202,6 +203,11 @@ class BoardActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelect
         recyclerView.layoutManager = LinearLayoutManager(this)
         recyclerView.setHasFixedSize(true)
         recyclerView.addItemDecoration(MarginItemDecoration(resources.getDimension(R.dimen.default_padding).toInt()))
+
+        val itemAnimator = DefaultItemAnimator()
+        itemAnimator.addDuration = 1000
+        itemAnimator.removeDuration = 1000
+        recyclerView.itemAnimator = itemAnimator
 
         val myAdapter = TaskAdapter(this, tasks)
         recyclerView.adapter = myAdapter
