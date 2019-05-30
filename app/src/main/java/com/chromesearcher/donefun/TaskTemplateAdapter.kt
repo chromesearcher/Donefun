@@ -8,6 +8,7 @@ import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.RelativeLayout
 import kotlinx.android.synthetic.main.task_template_item.view.*
 
 class TaskTemplateAdapter (private val context: Context, private val templates: ArrayList<TaskTemplate>) : RecyclerView.Adapter<TaskTemplateAdapter.TaskTemplateViewHolder>() {
@@ -39,9 +40,8 @@ class TaskTemplateAdapter (private val context: Context, private val templates: 
         val template: SelectableTaskTemplate = templates[position] as SelectableTaskTemplate
 
         holder.taskTemplateNameTextView.text = template.text
-//        holder.taskImageView.setImageResource(templates[position].iconId)
 
-        val parent = holder.taskTemplateNameTextView.parent as ConstraintLayout
+        val parent = holder.taskTemplateNameTextView.parent as RelativeLayout
 
         if (template.selected) {
             parent.background = ColorDrawable(context.resources.getColor(R.color.colorPrimary))

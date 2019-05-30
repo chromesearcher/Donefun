@@ -3,14 +3,11 @@ package com.chromesearcher.donefun
 import android.content.Context
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
-import android.support.constraint.ConstraintLayout
 import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.RelativeLayout
-import kotlinx.android.synthetic.main.task_item.view.*
-import kotlinx.android.synthetic.main.task_item.view.task_imageView
 import kotlinx.android.synthetic.main.task_item.view.task_name_textview
 import kotlinx.android.synthetic.main.task_item2.view.*
 
@@ -33,12 +30,12 @@ class TaskAdapter (private val context: Context, private val tasks: ArrayList<Ta
     }
 
     override fun onBindViewHolder(holder: TaskViewHolder, position: Int) {
-        holder.taskNameTextView.text = tasks[position].template.text
+        holder.taskNameTextView.text = tasks[position].name
 
         if (tasks[position].status == "IN PROGRESS") {
-            holder.statusImageView.visibility = View.VISIBLE
-        } else {
             holder.statusImageView.visibility = View.INVISIBLE
+        } else {
+            holder.statusImageView.visibility = View.VISIBLE
         }
 
         val parent = holder.taskNameTextView.parent as RelativeLayout

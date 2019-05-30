@@ -3,11 +3,11 @@ package com.chromesearcher.donefun
 import android.content.Context
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
-import android.support.constraint.ConstraintLayout
 import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.RelativeLayout
 import android.widget.TextView
 import kotlinx.android.synthetic.main.board_item.view.*
 
@@ -31,7 +31,7 @@ class BoardAdapter (private val context: Context, private val boards: ArrayList<
         holder.boardNameTextView.text = boards[position].name
         holder.actorNameTextView.text = boards[position].actor
 
-        val parent = holder.boardNameTextView.parent as ConstraintLayout
+        val parent = holder.boardNameTextView.parent as RelativeLayout
         parent.background = ColorDrawable(Color.WHITE)
     }
 

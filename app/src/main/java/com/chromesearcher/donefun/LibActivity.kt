@@ -23,8 +23,10 @@ class LibActivity: AppCompatActivity() {
     private lateinit var fabAdd: FloatingActionButton
 
     // source board which asked for new Tasks (used in ADD mode)
-    // thats board.id, not board.name
+    // thats boardId, not boardName
     private lateinit var board: String
+    // curr user, also userId, not name or smth else
+    private lateinit var user: String
     private var nSelected: Int = 0
 
     private val templates: ArrayList<TaskTemplate> = ArrayList()
@@ -44,8 +46,6 @@ class LibActivity: AppCompatActivity() {
         var pos = viewHolder.adapterPosition
         val item: SelectableTaskTemplate = templates[pos] as SelectableTaskTemplate
 
-        Toast.makeText(applicationContext, "FUK U: " + item.text, Toast.LENGTH_SHORT).show()
-
         if (addMode) { // flow add task
             // flip selection
             item.selected = !item.selected
@@ -58,7 +58,6 @@ class LibActivity: AppCompatActivity() {
         } else { // flow LIB
             val oldId = item.id
             val oldText = item.text
-            val oldIcon = item.iconId
 
             val input = EditText(this)
             input.inputType = InputType.TYPE_CLASS_TEXT
@@ -72,7 +71,7 @@ class LibActivity: AppCompatActivity() {
                 db.collection(templatesCollection).document(oldId)
                         .update("name", input.text.toString())
                         .addOnSuccessListener {
-                            val newTemplate = SelectableTaskTemplate(oldIcon, input.text.toString(), oldId, false)
+                            val newTemplate = SelectableTaskTemplate(input.text.toString(), oldId, false)
                             templates.set(pos, newTemplate)
 
                             Log.d(TAG, "DocumentSnapshot (template) successfully written!")
@@ -82,9 +81,7 @@ class LibActivity: AppCompatActivity() {
                         }
                         .addOnFailureListener { e -> Log.w(TAG, "Error writing template", e) }
             }
-            builder.setNegativeButton("CANCEL") { _, _ ->
-                Toast.makeText(applicationContext, "FUK U", Toast.LENGTH_SHORT).show()
-            }
+            builder.setNegativeButton("CANCEL") { _, _ -> }
             builder.show()
         }
     }
@@ -111,9 +108,7 @@ class LibActivity: AppCompatActivity() {
                         }
                         .addOnFailureListener { e -> Log.w(TAG, "Error deleting template", e) }
             }
-            builder.setNegativeButton("CANCEL") { _, _ ->
-                Toast.makeText(applicationContext, "FUK U", Toast.LENGTH_SHORT).show()
-            }
+            builder.setNegativeButton("CANCEL") { _, _ -> }
             builder.show()
         }
         true
@@ -130,6 +125,7 @@ class LibActivity: AppCompatActivity() {
         }
 
         board = intent.getStringExtra("board")
+        user = intent.getStringExtra("user")
 
         initRecyclerView()
         downloadTemplates()
@@ -155,17 +151,10 @@ class LibActivity: AppCompatActivity() {
         db.collection(templatesCollection).get(source)
             .addOnSuccessListener { docs ->
                 for (doc in docs) {
-                    val iconId = (doc.data["iconId"] as String).toInt()
                     val text = doc.data["name"] as String
                     val id = doc.id
-                    var icon: Int = 0
 
-                    when (iconId) {
-                        0 -> icon = R.drawable.ic_baseline_build_24px
-                        1 -> icon = R.drawable.ic_shopping_cart_black_24dp
-                        2 -> icon = R.drawable.ic_wc_black_24dp
-                    }
-                    templates.add(SelectableTaskTemplate(icon, text, id, false))
+                    templates.add(SelectableTaskTemplate(text, id, false))
                 }
 
                 // TODO: make it safe
@@ -188,17 +177,22 @@ class LibActivity: AppCompatActivity() {
                         if ((template as SelectableTaskTemplate).selected) {
                             // push new task to DB
                             val data = HashMap<String, Any>()
-                            data["board"] = board
+                            data["ownerId"] = user
+                            data["boardId"] = board
                             data["status"] = "IN PROGRESS"
-                            data["typeId"] = template.id
 
-                            val dateCreated = ServerValue.TIMESTAMP
-                            data["date_created"] = dateCreated
+                            val temp = HashMap<String, String>()
+                            temp["id"] = template.id
+                            temp["name"] = template.text
+                            data["template"] = temp
+
+//                            val dateCreated = ServerValue.TIMESTAMP
+//                            data["date_created"] = dateCreated
 
                             db.collection(tasksCollection)
                                 .add(data)
                                 .addOnSuccessListener { docRef ->
-                                    Log.d(TAG, "DocumentSnapshot written with ID: ${docRef.id}")
+                                    Log.d(TAG, "DocumentSnapshot (task) written with ID: ${docRef.id}")
                                 }
                                 .addOnFailureListener { e ->
                                     Log.w(TAG, "Error adding new Task", e)
@@ -212,9 +206,7 @@ class LibActivity: AppCompatActivity() {
                     setResult(RESULT_OK, newIntent)
                     finish() // back to previous activity
                 }
-                builder.setNegativeButton("CANCEL") { _, _ ->
-                    Toast.makeText(applicationContext, "FUK U", Toast.LENGTH_SHORT).show()
-                }
+                builder.setNegativeButton("CANCEL") { _, _ -> }
                 builder.show()
 
             } else { // LIB flow
@@ -226,22 +218,19 @@ class LibActivity: AppCompatActivity() {
                 builder.setView(input)
                 builder.setPositiveButton("OK") { _, _ ->
                     val data = HashMap<String, Any>()
-                    data["iconId"] = "0"
                     data["name"] = input.text.toString()
 
                     // push new data to DB
                     db.collection(templatesCollection)
                         .add(data)
                         .addOnSuccessListener { docRef ->
-                            templates.add(SelectableTaskTemplate(0, input.text.toString(), docRef.id, false))
+                            templates.add(SelectableTaskTemplate( input.text.toString(), docRef.id, false))
 
                             // TODO: make it safe
                             recyclerView.adapter!!.notifyDataSetChanged() // danger, adapter may be null in come cases
                         }
                 }
-                builder.setNegativeButton("CANCEL") { _, _ ->
-                    Toast.makeText(applicationContext, "FUK U", Toast.LENGTH_SHORT).show()
-                }
+                builder.setNegativeButton("CANCEL") { _, _ -> }
                 builder.show()
             }
         }

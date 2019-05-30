@@ -71,9 +71,7 @@ class BoardsListActivity: AppCompatActivity() {
                     }
                     .addOnFailureListener { e -> Log.w(TAG, "Error writing board", e) }
         }
-        builder.setNegativeButton("CANCEL") { _, _ ->
-            Toast.makeText(applicationContext, "FUK U", Toast.LENGTH_SHORT).show()
-        }
+        builder.setNegativeButton("CANCEL") { _, _ -> }
         builder.show()
     }
 
@@ -118,6 +116,7 @@ class BoardsListActivity: AppCompatActivity() {
                                             Log.d(TAG, "task successfully deleted from DB!")
                                         }
                                         .addOnFailureListener { e -> Log.w(TAG, "Error deleting task", e) }
+
                                 }
                             }
                             .addOnFailureListener { exc ->
@@ -126,9 +125,7 @@ class BoardsListActivity: AppCompatActivity() {
                     }
                     .addOnFailureListener { e -> Log.w(TAG, "Error deleting board", e) }
         }
-        builder.setNegativeButton("CANCEL") { _, _ ->
-            Toast.makeText(applicationContext, "FUK U", Toast.LENGTH_SHORT).show()
-        }
+        builder.setNegativeButton("CANCEL") { _, _ -> }
         builder.show()
 
         true
@@ -213,9 +210,7 @@ class BoardsListActivity: AppCompatActivity() {
                         recyclerView.adapter!!.notifyDataSetChanged() // danger, adapter may be null in come cases
                     }
             }
-            builder.setNegativeButton("CANCEL") { _, _ ->
-                Toast.makeText(applicationContext, "FUK U", Toast.LENGTH_SHORT).show()
-            }
+            builder.setNegativeButton("CANCEL") { _, _ -> }
             builder.show()
         }
     }
