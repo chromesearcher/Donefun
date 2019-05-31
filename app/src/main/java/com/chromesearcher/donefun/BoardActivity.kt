@@ -311,7 +311,8 @@ class BoardActivity : AppCompatActivity() /* TODO: uncomment , NavigationView.On
     private fun downloadTasks(boardId: String) {
 
         db.collection(tasksCollection)
-            .whereEqualTo("board", boardId)//.orderBy("date_created")
+            .whereEqualTo("boardId", boardId)//.orderBy("date_created")
+            .whereEqualTo("ownerId", user)
             .get()
             .addOnSuccessListener { docsT ->
                 for (doc in docsT) {

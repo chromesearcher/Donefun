@@ -12,6 +12,7 @@ import android.util.Log
 import android.view.View
 import android.widget.EditText
 import android.widget.Toast
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Source
 import com.google.firebase.database.ServerValue
@@ -147,12 +148,17 @@ class LibActivity: AppCompatActivity() {
     }
 
     private fun downloadTemplates() {
-        // Acquire Templates (all)
-        db.collection(templatesCollection).get(source)
+
+
+
+        // Acquire Templates (all for curr user)
+        db.collection(templatesCollection).whereEqualTo("ownerId", user)
+            .get()
             .addOnSuccessListener { docs ->
                 for (doc in docs) {
                     val text = doc.data["name"] as String
                     val id = doc.id
+                    val ownerId = doc.data["ownerId"] as String
 
                     templates.add(SelectableTaskTemplate(text, id, false))
                 }
@@ -185,6 +191,9 @@ class LibActivity: AppCompatActivity() {
                             temp["id"] = template.id
                             temp["name"] = template.text
                             data["template"] = temp
+
+                            val fAuth = FirebaseAuth.getInstance()
+                            val uid = fAuth.uid
 
 //                            val dateCreated = ServerValue.TIMESTAMP
 //                            data["date_created"] = dateCreated
@@ -219,6 +228,11 @@ class LibActivity: AppCompatActivity() {
                 builder.setPositiveButton("OK") { _, _ ->
                     val data = HashMap<String, Any>()
                     data["name"] = input.text.toString()
+                    data["ownerId"] = user
+
+                    val fAuth = FirebaseAuth.getInstance()
+                    val uid = fAuth.uid
+                    uid == "0"
 
                     // push new data to DB
                     db.collection(templatesCollection)
